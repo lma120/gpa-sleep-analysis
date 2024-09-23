@@ -1,6 +1,6 @@
 ---
 title: "Research Questions"
-author: "Team name - Team member 1, Team member 2, Team member 3, Team member 4"
+author: "WALE - Liane Ma, Amy Xu, Will Skelly, Eshan Mehere"
 format: pdf
 execute: 
   warning: false
@@ -10,10 +10,34 @@ editor: visual
 
 ## Research Question 1
 
+Research Question: What factors impact academic performance for students?
+
+The target population of interest is students from elementary school to college-age.
+
+As college students we want to discover the impacts of sleep, social media, screen time, etc. on academic performance.
+
+The type of data we might use might include average sleep, average screen time, whether or not a student uses social media, grade, time spent studying, GPA/Standardized test scores, etc.
+
 \pagebreak
 
 ## Research Question 2
 
+Research Question: How do different types of trees impact climate change across areas?
+
+The target population of interest is different types of trees in various locations.
+
+Will is reading a book about trees and our future may be dictated by climate change, so we're interested in looking into the effects of trees on climate change.
+
+The type of data we might use might include type of tree, location of tree, temperature, rain, natural disaster occurrence, etc.
+
 \pagebreak
 
 ## Research Question 3
+
+Research Question: How does raising the minimum wage impact small business success/ How might various factors impact business success rates?
+
+The target population of interest is business owners.
+
+Small businesses are the backbone of society and there are an increasing amount of people starting small businesses, so it would be interesting to see what influences small business success and failure.
+
+The type of data we might use might include minimum wage in different states, location, business profit, business survived or not, initial investment, rent.
