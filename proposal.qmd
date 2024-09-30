@@ -1,6 +1,6 @@
 ---
 title: "Project Proposal"
-author: "Team name - Team member 1, Team member 2, Team member 3, Team member 4"
+author: "WALE - Liane Ma, Amy Xu, Will Skelly, Eshan Mehere"
 format: pdf
 execute: 
   warning: false
@@ -12,9 +12,9 @@ editor: visual
 #| label: load-pkg-data
 library(tidyverse)
 library(tidymodels)
-# add other packages as needed
 
-# add code to load data
+
+university_dataset <- read_csv("data/cmu-sleep.csv")
 ```
 
 ## Introduction
