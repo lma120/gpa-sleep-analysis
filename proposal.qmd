@@ -19,7 +19,11 @@ university_dataset <- read_csv("data/cmu-sleep.csv")
 
 ## Introduction
 
-...
+Academic performance varies widely from student-to-student, likely attributed to a variety of factors including but not limited to students’ amount of sleep, classes taken, university type, and background.
+
+Our research question is: How do differences in sleep, race, gender, university type, and first-generation status affect college first-years’ cumulative GPA?
+
+It is important to determine what factors or combinations of factors can impact students’ GPA, especially for first-years as they transition from high school to university. As college students, we are interested in exploring how academic performance is affected differently by lack of sleep, whether a student goes to a public or private university, and more as many of these issues affect us currently. It is well-known that [sleep impacts students’ academic achievement](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7381801/), but we aim to explore this in terms of the time students went to bed, average sleep time, and more while also accounting for students’ background and the type of university they go to. We hypothesize that the average time in bed will have the largest effect on cumulative GPA and that having less variation in bed time will lead to a higher cumulative GPA. We also anticipate the type of university students attend and first-gen status to have an affect on students' GPA.
 
 ## Data description
 
