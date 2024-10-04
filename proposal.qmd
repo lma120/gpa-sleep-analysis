@@ -88,9 +88,8 @@ Some additional visualization options to explore this data in the future could i
 
 -   Facet-wrapped/color-coded scatterplot by race for average time in bed vs. cumulative GPA
 
-```{=html}
 <!-- -->
-```
+
 -   Facet-wrapped/color-coded scatterplot by gender for average time in bed vs cumulative GPA
 
 -   Side by side boxplots (separated by university type) distribution of cumulative GPA 
@@ -105,7 +104,25 @@ Some additional visualization options to explore this data in the future could i
 
 ## Analysis approach
 
-...
+Potential predictor variables of interest: 
+
+-   bedtime_mssd
+
+-   TotalSleepTime
+
+-   daytime_sleep
+
+-   study
+
+-   term_units
+
+-   demo_gender
+
+-   demo_firstgen
+
+-   demo_race
+
+We can use a multiple linear regression technique for this dataset that predicts GPA based on the above variables. We have both categorical and quantitative variables as predictors.
 
 ## Data dictionary
 
