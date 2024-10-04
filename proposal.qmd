@@ -88,9 +88,8 @@ Some additional visualization options to explore this data in the future could i
 
 -   Facet-wrapped/color-coded scatterplot by race for average time in bed vs. cumulative GPA
 
-```{=html}
 <!-- -->
-```
+
 -   Facet-wrapped/color-coded scatterplot by gender for average time in bed vs cumulative GPA
 
 -   Side by side boxplots (separated by university type) distribution of cumulative GPA 
