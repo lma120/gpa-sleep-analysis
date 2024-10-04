@@ -12,7 +12,8 @@ editor: visual
 #| label: load-pkg-data
 library(tidyverse)
 library(tidymodels)
-
+library(dplyr)
+library(knitr)
 
 university_dataset <- read_csv("data/cmu-sleep.csv")
 ```
@@ -31,7 +32,76 @@ It is important to determine what factors or combinations of factors can impact 
 
 ## Exploratory data analysis
 
-...
+We need to clean the data by transforming the variable `study` to a variable for university type, where study 1 and 5 are data collected from a STEM-focused private university (CMU), study 2 and 3 are from a large public university (UW), and study 4 is from a small private Catholic university (ND). Additionally, we need to consider removing NAs or finding a way to replace them, or removing variables that are not needed that contain many NAs (i.e. `Zterm_units_ZofZ`.
+
+Visualizations of the response variable:
+
+```{r}
+university_dataset %>% 
+  ggplot(aes(
+    x = cum_gpa
+  )) +
+  geom_boxplot() +
+  facet_wrap(~study) +
+  labs(
+    title = "Distribution of Cumulative GPA by Study #",
+    x = "Cumulative GPA",
+    y = "Count"
+  )
+university_dataset %>% 
+  ggplot(aes(
+    x = cum_gpa
+  )) +
+  geom_histogram(bins = 20) +
+  labs(
+    title = "Distribution of Cumulative GPA",
+    x = "Cumulative GPA (/4.0)",
+    y = "Count"
+  )
+
+tst_summary <- university_dataset %>%
+  summarize(
+    mean = mean(TotalSleepTime, na.rm = TRUE),
+    sd = sd(TotalSleepTime, na.rm = TRUE),
+    min = min(TotalSleepTime, na.rm = TRUE),
+    max = max(TotalSleepTime, na.rm = TRUE),
+    median = median(TotalSleepTime, na.rm = TRUE)
+  )
+tst_summary %>% 
+  kable(caption = "Summary Statistics for Total Sleep Time (hours)")
+
+university_dataset %>% 
+  ggplot(aes(
+    x = TotalSleepTime,
+    y = cum_gpa
+  )) + 
+  geom_point() +
+  labs(
+    title = "Cumulative GPA vs. Total Sleep Time",
+    x = "Total Sleep Time (hours)",
+    y = "Cumulative GPA (/4.0)"
+  )
+   
+```
+
+Some additional visualization options to explore this data in the future could include:
+
+-   Facet-wrapped/color-coded scatterplot by race for average time in bed vs. cumulative GPA
+
+```{=html}
+<!-- -->
+```
+-   Facet-wrapped/color-coded scatterplot by gender for average time in bed vs cumulative GPA
+
+-   Side by side boxplots (separated by university type) distribution of cumulative GPA 
+
+-   Cumulative GPA vs. Term Units scatterplot 
+
+-   Summary statistics of cumulative GPA
+
+-   Summary statistics/boxplot of totalsleeptime
+
+-   Scatterplot of daytime sleep vs. cumulative GPA
 
 ## Analysis approach
 
