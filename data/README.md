@@ -8,9 +8,54 @@ The data dictionary for your data file(s) using the following format.
 
 ## Name of data file
 
-| Variable  | Description               |
-|:----------|:--------------------------|
-| variable1 | Description of variable 1 |
-| variable2 | Description of variable 2 |
-| variable3 | Description of variable 3 |
-| ...       | ...                       |
+Variable
+Description
+
+subject_id
+ID of the participant
+
+study
+Study number where study 1 represents CMU in Spring 2018, study 2 represents UW in Spring 2018, study 3 represents UW in Spring 2019, study 4 represents ND in Spring 2016, and study 4 represents CMU in Spring 2017.
+
+cohort
+Name of the cohort the participant is in.
+
+demo_race
+Students were considered underrepresented if either parent was Black, Hispanic or Latino, Native American, or Pacific Islander and were assigned 0. Students were non-underrepresented if neither parent was from an underrepresented category (i.e., both parents had White or Asian ancestry) and are represented by a 1.
+
+demo_gender
+Gender of the subject, with male represented by a 0 and female represented by a 1, as reported by their institution.
+
+demo_firstgen
+First-generation status; Students were considered first-generation if neither parent completed any college (i.e., high school diploma or less) and were assigned a 1 and a 0 otherwise. 
+
+bedtime_mssd
+ This is a measure of bedtime variability, calculated as the average squared difference of successive bedtimes, measured in units of hours. This measures the variability from day to day by computing the average of (night2 bedtime - night1 bedtime)^2, (night3 bedtime - night2 bedtime)^2 …
+
+TotalSleepTime
+Average time in bed (wake time minus bedtime),  minus total length of awake/restlessness during this time, in minutes. 
+
+midpoint_sleep
+Average midpoint of bedtime and wake time, in total minutes after 11pm. (100 is 12:40 am).
+
+frac_nights_with_data
+Fraction of total nights where data was recorded. (There were some instances where Fitbit battery may have died or they weren’t worn to bed.) 
+
+daytime_sleep
+Average time slept during the daytime, including short naps, in minutes.
+
+
+cum_gpa
+Cumulative GPA (out of 4.0) of all previous semesters. Because subjects are first years, this usually just represents their fall GPA. 
+
+term_gpa
+The end of term GPA (out of 4.0) 
+
+term_units
+Number of course units a student took in the term 
+
+Zterm_units_ZofZ
+Standardized measure of course load, where 0 represents an average course load, and positive and negative values represents heavier and lighter course loads respectively. This was calculated by finding the Z-score of every student’s units relative to their study cohort, then Z-scoring them again relative to the entire population.
+
+
+
