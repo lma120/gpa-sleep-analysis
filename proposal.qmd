@@ -28,7 +28,13 @@ It is important to determine what factors or combinations of factors can impact 
 
 ## Data description
 
-...
+https://cmustatistics.github.io/data-repository/psychology/cmu-sleep.html
+
+The data was originally collected in 2019, with the participants being first-year students at the following three universities: Carnegie Mellon University (CMU), a STEM-focused private university, The University of Washington (UW), a large public university, and Notre Dame University (ND), a private Catholic university. To collect data on sleep, each participating student was given a Fitbit device to track their sleep and physical activity for a month in the spring term, and grade and demographic data was provided by university registrars.
+
+There are 634 observations, representing the 634 participants in this study. Race is a binary variable separated into underrepresented students and non-underrepresented students with 0 being underrepresented and 1 being non-underrepresented. Students are considered underrepresented if either parent is Black, Hispanic or Latino, Native American, or Pacific, and students are deemed non-underrepresented if both parents have White or Asian ancestry. The gender of the subject is also binary with 0 being male and 1 being female. First-generation status is binary with 0 being non-first gen and 1 being first-gen. The mean successive squared difference of bedtime measures the bedtime variability, specifically the average of the squared difference of bedtime on consecutive nights.
+
+
 
 ## Exploratory data analysis
 
@@ -104,7 +110,25 @@ Some additional visualization options to explore this data in the future could i
 
 ## Analysis approach
 
-...
+Potential predictor variables of interest: 
+
+-   bedtime_mssd
+
+-   TotalSleepTime
+
+-   daytime_sleep
+
+-   study
+
+-   term_units
+
+-   demo_gender
+
+-   demo_firstgen
+
+-   demo_race
+
+We can use a multiple linear regression technique for this dataset that predicts GPA based on the above variables. We have both categorical and quantitative variables as predictors.
 
 ## Data dictionary
 
