@@ -1,7 +1,7 @@
 ---
 title: "Your project title"
-author: "Team Name: Team member 1, Team member 2, Team member 3, Team member 4"
-date: "Update date"
+author: "Wale: Liane, Amy, Eshan, Will"
+date: "10/31/24"
 format: pdf
 execute: 
   warning: false
@@ -13,8 +13,9 @@ editor: visual
 ```{r}
 #| label: load packages and data
 library(tidyverse)
+library(GGally)
 university_dataset <- read_csv("data/cmu-sleep.csv")
-glimpse(university_dataset)
+#glimpse(university_dataset)
 ```
 
 Your written report goes here!
@@ -40,14 +41,21 @@ university_clean <- university_dataset |>
     study %in% c(2, 3) ~ "public",
     study == 4 ~ "cath_priv"
   ))
-glimpse(university_clean)
+#glimpse(university_clean)
 
 # need to continue cleaning for NAs, removing unused variables (ZtoZterm)? also maybe factor(demo firstgen, race, etc)
 ```
 
 Univariate EDA of The Response & Key Predictor Variables
+
 ```{r}
 #| label: univariate-EDA
+
+
+university_clean |> 
+  select(term_gpa, cum_gpa, TotalSleepTime, bedtime_mssd, demo_firstgen, university, daytime_sleep) |>
+  ggpairs()
+
 
 university_clean |>
   ggplot(aes(x = term_gpa)) +
@@ -117,7 +125,6 @@ university_clean |>
 
 ```
 
-
 Bivariate EDA of The Response & Key Predictor Variables
 
 ```{r}
@@ -131,11 +138,26 @@ university_clean |>
   geom_point()
 
 university_clean |>
+  ggplot(aes(x = TotalSleepTime,
+             y = term_gpa)) + 
+  geom_point()
+
+university_clean |>
   ggplot(aes(
     x = TotalSleepTime,
     y = cum_gpa,
     color = as.factor(demo_gender)
   )) +
+  geom_point()
+
+university_clean |>
+  mutate(term_l_cum = if_else(term_gpa < cum_gpa, 1, 0))|>
+  ggplot(aes(x = term_gpa, y = TotalSleepTime, color = term_l_cum)) +
+  geom_point()
+
+university_clean |>
+  mutate(term_l_cum = if_else(term_gpa < cum_gpa, 1, 0))|>
+  ggplot(aes(x = term_gpa, y = bedtime_mssd, color = term_l_cum)) +
   geom_point()
 
 university_clean |>
