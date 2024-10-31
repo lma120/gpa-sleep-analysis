@@ -40,8 +40,9 @@ university_clean <- university_dataset |>
     study %in% c(1, 5) ~ "stem_priv",
     study %in% c(2, 3) ~ "public",
     study == 4 ~ "cath_priv"
-  ))
-#glimpse(university_clean)
+  )) |>
+  filter(frac_nights_with_data > .50)
+glimpse(university_clean)
 
 # need to continue cleaning for NAs, removing unused variables (ZtoZterm)? also maybe factor(demo firstgen, race, etc)
 ```
@@ -128,38 +129,47 @@ university_clean |>
 Bivariate EDA of The Response & Key Predictor Variables
 
 ```{r}
-
+#WANT THIS GRAPH
 university_clean |>
   ggplot(aes(
     x = TotalSleepTime,
     y = cum_gpa,
     color = as.factor(demo_race)
   )) +
-  geom_point()
+  geom_point() +
+  geom_smooth(method = "lm")
 
 university_clean |>
   ggplot(aes(x = TotalSleepTime,
              y = term_gpa)) + 
   geom_point()
 
+#WANT THIS GRAPH, NEED TO REMOVE NAs
 university_clean |>
   ggplot(aes(
     x = TotalSleepTime,
     y = cum_gpa,
     color = as.factor(demo_gender)
   )) +
-  geom_point()
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+
+#LIKE THIS GRAPH
+university_clean |>
+  mutate(term_l_cum = if_else(term_gpa < cum_gpa, 1, 0))|>
+  ggplot(aes(x = term_gpa, y = TotalSleepTime, color = factor(term_l_cum))) +
+  facet_wrap( ~ university) + 
+  geom_point() +
+  geom_smooth(method = "lm") 
+
 
 university_clean |>
   mutate(term_l_cum = if_else(term_gpa < cum_gpa, 1, 0))|>
-  ggplot(aes(x = term_gpa, y = TotalSleepTime, color = term_l_cum)) +
-  geom_point()
+  ggplot(aes(x = term_gpa, y = bedtime_mssd, color = factor(term_l_cum))) +
+  geom_point() +
+  geom_smooth(method = "lm")
 
-university_clean |>
-  mutate(term_l_cum = if_else(term_gpa < cum_gpa, 1, 0))|>
-  ggplot(aes(x = term_gpa, y = bedtime_mssd, color = term_l_cum)) +
-  geom_point()
-
+#THIS GRAPH
 university_clean |>
   ggplot(aes(
     x = university,
@@ -180,6 +190,7 @@ university_clean |>
   )) +
   geom_point()
 
+#WANT THIS ONE BUT HAVE TO CLEAN
 university_clean |>
   ggplot(aes(
     x = as.factor(demo_firstgen),
@@ -187,12 +198,54 @@ university_clean |>
   )) +
   geom_boxplot() #need to clean for first_gen = 2, NA vals?
 
+#WANT THIS ONE
 university_clean |>
   ggplot(aes(
     x = bedtime_mssd, 
     y = cum_gpa, 
     color = university
   )) +
-  geom_point(alpha = 0.6) 
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm")
+
+university_clean |>
+  ggplot(aes(
+    x = TotalSleepTime,
+    y = term_gpa
+  )) +
+  geom_point(alpha = 0.6) +
+  facet_wrap(~ university) +
+  labs(
+    x = "Total Sleep Time (hours)",
+    y = "Term GPA",
+    title = "Sleep vs. Cumulative GPA by University"
+  )
+
+university_clean |>
+  ggplot(aes(
+    x = TotalSleepTime,
+    y = term_gpa
+  )) +
+  geom_point(alpha = 0.6) +
+  facet_wrap(~ demo_race) +
+  labs(
+    x = "Total Sleep Time (hours)",
+    y = "Term GPA",
+    title = "Sleep vs. Cumulative GPA by race"
+  )
+
+#THIS GRAPH
+university_clean |>
+  ggplot(aes(
+    x = daytime_sleep,
+    y = term_gpa
+  )) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+university_clean 
+
 
 ```
+
+notes: stem_priv cluster is entirely lower than public cluster
