@@ -41,7 +41,8 @@ university_clean <- university_dataset |>
     study %in% c(2, 3) ~ "public",
     study == 4 ~ "cath_priv"
   )) |>
-  filter(frac_nights_with_data > .50)
+  filter(frac_nights_with_data > .50) |>
+  filter(demo_firstgen != 2)
 glimpse(university_clean)
 
 # need to continue cleaning for NAs, removing unused variables (ZtoZterm)? also maybe factor(demo firstgen, race, etc)
@@ -53,10 +54,9 @@ Univariate EDA of The Response & Key Predictor Variables
 #| label: univariate-EDA
 
 
-university_clean |> 
-  select(term_gpa, cum_gpa, TotalSleepTime, bedtime_mssd, demo_firstgen, university, daytime_sleep) |>
-  ggpairs()
-
+# university_clean |> 
+#   select(term_gpa, cum_gpa, TotalSleepTime, bedtime_mssd, demo_firstgen, university, daytime_sleep) |>
+#   ggpairs()
 
 university_clean |>
   ggplot(aes(x = term_gpa)) +
@@ -73,6 +73,28 @@ university_clean |>
        y = "Count")
 
 university_clean |>
+  group_by(university) |>
+  summarize(
+    mean_tgpa = mean(term_gpa, na.rm = TRUE),
+    median_tgpa = median(term_gpa, na.rm = TRUE),
+    sd_tgpa = sd(term_gpa, na.rm = TRUE),
+    min_tgpa = min(term_gpa, na.rm = TRUE),
+    max_tgpa = max(term_gpa, na.rm = TRUE),
+    count = n()
+  )
+
+university_clean |>
+  group_by(university) |>
+  summarize(
+    mean_cgpa = mean(cum_gpa, na.rm = TRUE),
+    median_cgpa = median(cum_gpa, na.rm = TRUE),
+    sd_cgpa = sd(cum_gpa, na.rm = TRUE),
+    min_cgpa = min(cum_gpa, na.rm = TRUE),
+    max_cgpa = max(cum_gpa, na.rm = TRUE),
+    count = n()
+  )
+
+university_clean |>
   ggplot(aes(x = TotalSleepTime)) + 
   geom_histogram() +
   labs(title = "Distribution of the Total Sleep Time",
@@ -87,8 +109,23 @@ university_clean |>
        y = "Count")
 
 university_clean |>
+  ggplot(aes(x = frac_nights_with_data)) + 
+  geom_histogram() +
+  labs(title = "Distribution of the Fraction of Nights With Data",
+       x = "Fraction of Nights With Data",
+       y = "Count")
+
+university_clean |>
+  ggplot(aes(x = daytime_sleep)) + 
+  geom_histogram() +
+  labs(title = "Distribution of Daytime Sleep",
+       x = "Daytime Sleep in Minutes",
+       y = "Count")
+  
+  
+university_clean |>
   group_by(demo_race) |>
-  summarise(count = n()) |>
+  summarise(count = n(), na.rm = TRUE) |>
   mutate(race_percentage = count / sum(count) * 100) |>
   ggplot(aes(x = "", y = race_percentage, fill = factor(demo_race, labels =
                             c("Underrepresented", "Non-Underrepresented")))) +
@@ -101,7 +138,7 @@ university_clean |>
 
 university_clean |>
   group_by(demo_gender) |>
-  summarise(count = n()) |>
+  summarise(count = n(), na.rm = TRUE) |>
   mutate(gender_percentage = count / sum(count) * 100) |>
   ggplot(aes(x = "", y = gender_percentage, fill = factor(demo_gender, labels =
                             c("Male", "Female")))) +
@@ -110,19 +147,27 @@ university_clean |>
   labs(title = "Distribution of Gender",
        fill = "Gender") 
 
-# university_clean |>
-#   group_by(demo_firstgen) |> # there is one value that is a 2
-#   summarise(count = n()) |>
-#   mutate(firstgen_percentage = count / sum(count) * 100) |>
-#   ggplot(aes(x = "", y = firstgen_percentage, fill = factor(demo_firstgen,
-#                                                             labels =
-#                             c("Non-First Gen", "First Gen")))) +
-#   geom_bar(stat = "identity", width = 1) +
-#   coord_polar("y", start = 0) +
-#   labs(title = "Distribution of First-generation Status",
-#        fill = "First-generation Status") 
+university_clean |>
+  group_by(demo_firstgen) |> 
+  summarise(count = n(), na.rm = TRUE) |>
+  mutate(firstgen_percentage = count / sum(count) * 100) |>
+  ggplot(aes(x = "", y = firstgen_percentage, fill = factor(demo_firstgen,
+                                                            labels =
+                            c("Non-First Gen", "First Gen")))) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  labs(title = "Distribution of First-generation Status",
+       fill = "First-generation Status")
 
-
+university_clean |>
+  group_by(university) |>
+  summarize(
+    total_count = n(),
+    na_count = sum(is.na(term_units)),
+    non_na_count = sum(!is.na(term_units))
+  ) 
+#a lot of NA values for the Catholic school -> will not use this variable
+#for analyses
 
 ```
 
