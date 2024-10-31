@@ -12,7 +12,9 @@ editor: visual
 
 ```{r}
 #| label: load packages and data
-
+library(tidyverse)
+university_dataset <- read_csv("data/cmu-sleep.csv")
+glimpse(university_dataset)
 ```
 
 Your written report goes here!
@@ -20,3 +22,76 @@ Your written report goes here!
 ::: callout-important
 Before you submit, make sure your code chunks are turned off with `echo: false` and there are no warnings or messages with `warning: false` and `message: false` in the YAML.
 :::
+
+Exploratory Data Analysis
+
+Clean Data
+
+```{r}
+university_clean <- university_dataset |>
+  mutate(university = case_when(
+    study %in% c(1, 5) ~ "stem_priv",
+    study %in% c(2, 3) ~ "public",
+    study == 4 ~ "cath_priv"
+  ))
+glimpse(university_clean)
+
+# need to continue cleaning for NAs, removing unused variables (ZtoZterm)? also maybe factor(demo firstgen, race, etc)
+```
+
+Bivariate EDA of Response & Key Predictor Variables
+
+```{r}
+
+university_clean |>
+  ggplot(aes(
+    x = TotalSleepTime,
+    y = cum_gpa,
+    color = as.factor(demo_race)
+  )) +
+  geom_point()
+
+university_clean |>
+  ggplot(aes(
+    x = TotalSleepTime,
+    y = cum_gpa,
+    color = as.factor(demo_gender)
+  )) +
+  geom_point()
+
+university_clean |>
+  ggplot(aes(
+    x = university,
+    y = cum_gpa,
+    fill = university
+  )) +
+  geom_boxplot() +
+  labs(
+    title = "Distribution of Cumulative GPA by University",
+    x = "University",
+    y = "Cumulative GPA"
+  )
+
+university_clean |>
+  ggplot(aes(
+    x = term_units,
+    y = term_gpa
+  )) +
+  geom_point()
+
+university_clean |>
+  ggplot(aes(
+    x = as.factor(demo_firstgen),
+    y = cum_gpa
+  )) +
+  geom_boxplot() #need to clean for first_gen = 2, NA vals?
+
+university_clean |>
+  ggplot(aes(
+    x = bedtime_mssd, 
+    y = cum_gpa, 
+    color = university
+  )) +
+  geom_point(alpha = 0.6) 
+
+```
