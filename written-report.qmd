@@ -1,7 +1,7 @@
 ---
 title: "Your project title"
-author: "Team Name: Team member 1, Team member 2, Team member 3, Team member 4"
-date: "Update date"
+author: "Wale: Liane, Amy, Eshan, Will"
+date: "10/31/24"
 format: pdf
 execute: 
   warning: false
@@ -12,7 +12,10 @@ editor: visual
 
 ```{r}
 #| label: load packages and data
-
+library(tidyverse)
+library(GGally)
+university_dataset <- read_csv("data/cmu-sleep.csv")
+#glimpse(university_dataset)
 ```
 
 Your written report goes here!
@@ -20,3 +23,274 @@ Your written report goes here!
 ::: callout-important
 Before you submit, make sure your code chunks are turned off with `echo: false` and there are no warnings or messages with `warning: false` and `message: false` in the YAML.
 :::
+
+Exploratory Data Analysis
+
+Description of the data set and key variables.
+
+The data was originally collected in 2019, with the participants being first-year students at the following three universities: Carnegie Mellon University (CMU), a STEM-focused private university, The University of Washington (UW), a large public university, and Notre Dame University (ND), a private Catholic university. To collect data on sleep, each participating student was given a Fitbit device to track their sleep and physical activity for a month in the spring term, and grade and demographic data was provided by university registrars.
+
+There are 634 observations, representing the 634 participants in this study. Race is a binary variable separated into underrepresented students and non-underrepresented students with 0 being underrepresented and 1 being non-underrepresented. Students are considered underrepresented if either parent is Black, Hispanic or Latino, Native American, or Pacific, and students are deemed non-underrepresented if both parents have White or Asian ancestry. The gender of the subject is also binary with 0 being male and 1 being female. First-generation status is binary with 0 being non-first gen and 1 being first-gen. The mean successive squared difference of bedtime measures the bedtime variability, specifically the average of the squared difference of bedtime on consecutive nights.
+
+Clean Data
+
+```{r}
+university_clean <- university_dataset |>
+  mutate(university = case_when(
+    study %in% c(1, 5) ~ "stem_priv",
+    study %in% c(2, 3) ~ "public",
+    study == 4 ~ "cath_priv"
+  )) |>
+  filter(frac_nights_with_data > .50) |>
+  filter(demo_firstgen != 2)
+glimpse(university_clean)
+
+# need to continue cleaning for NAs, removing unused variables (ZtoZterm)? also maybe factor(demo firstgen, race, etc)
+```
+
+Univariate EDA of The Response & Key Predictor Variables
+
+```{r}
+#| label: univariate-EDA
+
+
+# university_clean |> 
+#   select(term_gpa, cum_gpa, TotalSleepTime, bedtime_mssd, demo_firstgen, university, daytime_sleep) |>
+#   ggpairs()
+
+university_clean |>
+  ggplot(aes(x = term_gpa)) +
+  geom_histogram() +
+  labs(title = "Distribution of the Term GPA",
+       x = "Term GPA",
+       y = "Count")
+
+university_clean |>
+  ggplot(aes(x = cum_gpa)) +
+  geom_histogram() +
+  labs(title = "Distribution of the Cumulative GPA",
+       x = "Cumulative GPA",
+       y = "Count")
+
+university_clean |>
+  group_by(university) |>
+  summarize(
+    mean_tgpa = mean(term_gpa, na.rm = TRUE),
+    median_tgpa = median(term_gpa, na.rm = TRUE),
+    sd_tgpa = sd(term_gpa, na.rm = TRUE),
+    min_tgpa = min(term_gpa, na.rm = TRUE),
+    max_tgpa = max(term_gpa, na.rm = TRUE),
+    count = n()
+  )
+
+university_clean |>
+  group_by(university) |>
+  summarize(
+    mean_cgpa = mean(cum_gpa, na.rm = TRUE),
+    median_cgpa = median(cum_gpa, na.rm = TRUE),
+    sd_cgpa = sd(cum_gpa, na.rm = TRUE),
+    min_cgpa = min(cum_gpa, na.rm = TRUE),
+    max_cgpa = max(cum_gpa, na.rm = TRUE),
+    count = n()
+  )
+
+university_clean |>
+  ggplot(aes(x = TotalSleepTime)) + 
+  geom_histogram() +
+  labs(title = "Distribution of the Total Sleep Time",
+       x = "Total Sleep Time in Minutes", #consider switching to hours
+       y = "Count")
+
+university_clean |>
+  ggplot(aes(x = bedtime_mssd)) + 
+  geom_histogram() +
+  labs(title = "Distribution of the Bedtime Variability",
+       x = "Mean successive squared difference of bedtime",
+       y = "Count")
+
+university_clean |>
+  ggplot(aes(x = frac_nights_with_data)) + 
+  geom_histogram() +
+  labs(title = "Distribution of the Fraction of Nights With Data",
+       x = "Fraction of Nights With Data",
+       y = "Count")
+
+university_clean |>
+  ggplot(aes(x = daytime_sleep)) + 
+  geom_histogram() +
+  labs(title = "Distribution of Daytime Sleep",
+       x = "Daytime Sleep in Minutes",
+       y = "Count")
+  
+  
+university_clean |>
+  group_by(demo_race) |>
+  summarise(count = n(), na.rm = TRUE) |>
+  mutate(race_percentage = count / sum(count) * 100) |>
+  ggplot(aes(x = "", y = race_percentage, fill = factor(demo_race, labels =
+                            c("Underrepresented", "Non-Underrepresented")))) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  labs(title = "Distribution of Underrepresented Vs. Non-Underrepresented
+       Students",
+       fill = "Race")
+
+
+university_clean |>
+  group_by(demo_gender) |>
+  summarise(count = n(), na.rm = TRUE) |>
+  mutate(gender_percentage = count / sum(count) * 100) |>
+  ggplot(aes(x = "", y = gender_percentage, fill = factor(demo_gender, labels =
+                            c("Male", "Female")))) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  labs(title = "Distribution of Gender",
+       fill = "Gender") 
+
+university_clean |>
+  group_by(demo_firstgen) |> 
+  summarise(count = n(), na.rm = TRUE) |>
+  mutate(firstgen_percentage = count / sum(count) * 100) |>
+  ggplot(aes(x = "", y = firstgen_percentage, fill = factor(demo_firstgen,
+                                                            labels =
+                            c("Non-First Gen", "First Gen")))) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  labs(title = "Distribution of First-generation Status",
+       fill = "First-generation Status")
+
+university_clean |>
+  group_by(university) |>
+  summarize(
+    total_count = n(),
+    na_count = sum(is.na(term_units)),
+    non_na_count = sum(!is.na(term_units))
+  ) 
+#a lot of NA values for the Catholic school -> will not use this variable
+#for analyses
+
+```
+
+Bivariate EDA of The Response & Key Predictor Variables
+
+```{r}
+#WANT THIS GRAPH
+university_clean |>
+  ggplot(aes(
+    x = TotalSleepTime,
+    y = cum_gpa,
+    color = as.factor(demo_race)
+  )) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+university_clean |>
+  ggplot(aes(x = TotalSleepTime,
+             y = term_gpa)) + 
+  geom_point()
+
+#WANT THIS GRAPH, NEED TO REMOVE NAs
+university_clean |>
+  ggplot(aes(
+    x = TotalSleepTime,
+    y = cum_gpa,
+    color = as.factor(demo_gender)
+  )) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+
+#LIKE THIS GRAPH
+university_clean |>
+  mutate(term_l_cum = if_else(term_gpa < cum_gpa, 1, 0))|>
+  ggplot(aes(x = term_gpa, y = TotalSleepTime, color = factor(term_l_cum))) +
+  facet_wrap( ~ university) + 
+  geom_point() +
+  geom_smooth(method = "lm") 
+
+
+university_clean |>
+  mutate(term_l_cum = if_else(term_gpa < cum_gpa, 1, 0))|>
+  ggplot(aes(x = term_gpa, y = bedtime_mssd, color = factor(term_l_cum))) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+#THIS GRAPH
+university_clean |>
+  ggplot(aes(
+    x = university,
+    y = cum_gpa,
+    fill = university
+  )) +
+  geom_boxplot() +
+  labs(
+    title = "Distribution of Cumulative GPA by University",
+    x = "University",
+    y = "Cumulative GPA"
+  )
+
+university_clean |>
+  ggplot(aes(
+    x = term_units,
+    y = term_gpa
+  )) +
+  geom_point()
+
+#WANT THIS ONE BUT HAVE TO CLEAN
+university_clean |>
+  ggplot(aes(
+    x = as.factor(demo_firstgen),
+    y = cum_gpa
+  )) +
+  geom_boxplot() #need to clean for first_gen = 2, NA vals?
+
+#WANT THIS ONE
+university_clean |>
+  ggplot(aes(
+    x = bedtime_mssd, 
+    y = cum_gpa, 
+    color = university
+  )) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm")
+
+university_clean |>
+  ggplot(aes(
+    x = TotalSleepTime,
+    y = term_gpa
+  )) +
+  geom_point(alpha = 0.6) +
+  facet_wrap(~ university) +
+  labs(
+    x = "Total Sleep Time (hours)",
+    y = "Term GPA",
+    title = "Sleep vs. Cumulative GPA by University"
+  )
+
+university_clean |>
+  ggplot(aes(
+    x = TotalSleepTime,
+    y = term_gpa
+  )) +
+  geom_point(alpha = 0.6) +
+  facet_wrap(~ demo_race) +
+  labs(
+    x = "Total Sleep Time (hours)",
+    y = "Term GPA",
+    title = "Sleep vs. Cumulative GPA by race"
+  )
+
+#THIS GRAPH
+university_clean |>
+  ggplot(aes(
+    x = daytime_sleep,
+    y = term_gpa
+  )) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+university_clean 
+
+
+```
+
+notes: stem_priv cluster is entirely lower than public cluster

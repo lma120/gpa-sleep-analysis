@@ -92,13 +92,11 @@ Some additional visualization options to explore this data in the future could i
 
 -   Facet-wrapped/color-coded scatterplot by race for average time in bed vs. cumulative GPA
 
-<!-- -->
-
 -   Facet-wrapped/color-coded scatterplot by gender for average time in bed vs cumulative GPA
 
--   Side by side boxplots (separated by university type) distribution of cumulative GPA 
+-   Side by side boxplots (separated by university type) distribution of cumulative GPA
 
--   Cumulative GPA vs. Term Units scatterplot 
+-   Cumulative GPA vs. Term Units scatterplot
 
 -   Summary statistics of cumulative GPA
 
@@ -108,7 +106,7 @@ Some additional visualization options to explore this data in the future could i
 
 ## Analysis approach
 
-Potential predictor variables of interest: 
+Potential predictor variables of interest:
 
 -   bedtime_mssd
 
