@@ -34,8 +34,6 @@ The data was originally collected in 2019, with the participants being first-yea
 
 There are 634 observations, representing the 634 participants in this study. Race is a binary variable separated into underrepresented students and non-underrepresented students with 0 being underrepresented and 1 being non-underrepresented. Students are considered underrepresented if either parent is Black, Hispanic or Latino, Native American, or Pacific, and students are deemed non-underrepresented if both parents have White or Asian ancestry. The gender of the subject is also binary with 0 being male and 1 being female. First-generation status is binary with 0 being non-first gen and 1 being first-gen. The mean successive squared difference of bedtime measures the bedtime variability, specifically the average of the squared difference of bedtime on consecutive nights.
 
-
-
 ## Exploratory data analysis
 
 We need to clean the data by transforming the variable `study` to a variable for university type, where study 1 and 5 are data collected from a STEM-focused private university (CMU), study 2 and 3 are from a large public university (UW), and study 4 is from a small private Catholic university (ND). Additionally, we need to consider removing NAs or finding a way to replace them, or removing variables that are not needed that contain many NAs (i.e. `Zterm_units_ZofZ`.
