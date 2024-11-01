@@ -43,7 +43,7 @@ university_clean <- university_dataset |>
   )) |>
   filter(frac_nights_with_data > .50) |>
   filter(demo_firstgen != 2)
-glimpse(university_clean)
+#glimpse(university_clean)
 
 # need to continue cleaning for NAs, removing unused variables (ZtoZterm)? also maybe factor(demo firstgen, race, etc)
 ```
@@ -182,15 +182,12 @@ university_clean |>
     color = as.factor(demo_race)
   )) +
   geom_point() +
-  geom_smooth(method = "lm")
+  geom_smooth(method = "lm", se = FALSE)
 
-university_clean |>
-  ggplot(aes(x = TotalSleepTime,
-             y = term_gpa)) + 
-  geom_point()
 
 #WANT THIS GRAPH, NEED TO REMOVE NAs
 university_clean |>
+  filter(!is.na(demo_gender)) |>
   ggplot(aes(
     x = TotalSleepTime,
     y = cum_gpa,
@@ -205,14 +202,8 @@ university_clean |>
   ggplot(aes(x = term_gpa, y = TotalSleepTime, color = factor(term_l_cum))) +
   facet_wrap( ~ university) + 
   geom_point() +
-  geom_smooth(method = "lm") 
+  geom_smooth(method = "lm", se = FALSE) 
 
-
-university_clean |>
-  mutate(term_l_cum = if_else(term_gpa < cum_gpa, 1, 0))|>
-  ggplot(aes(x = term_gpa, y = bedtime_mssd, color = factor(term_l_cum))) +
-  geom_point() +
-  geom_smooth(method = "lm")
 
 #THIS GRAPH
 university_clean |>
@@ -228,12 +219,6 @@ university_clean |>
     y = "Cumulative GPA"
   )
 
-university_clean |>
-  ggplot(aes(
-    x = term_units,
-    y = term_gpa
-  )) +
-  geom_point()
 
 #WANT THIS ONE BUT HAVE TO CLEAN
 university_clean |>
@@ -251,33 +236,8 @@ university_clean |>
     color = university
   )) +
   geom_point(alpha = 0.6) +
-  geom_smooth(method = "lm")
+  geom_smooth(method = "lm", se = FALSE)
 
-university_clean |>
-  ggplot(aes(
-    x = TotalSleepTime,
-    y = term_gpa
-  )) +
-  geom_point(alpha = 0.6) +
-  facet_wrap(~ university) +
-  labs(
-    x = "Total Sleep Time (hours)",
-    y = "Term GPA",
-    title = "Sleep vs. Cumulative GPA by University"
-  )
-
-university_clean |>
-  ggplot(aes(
-    x = TotalSleepTime,
-    y = term_gpa
-  )) +
-  geom_point(alpha = 0.6) +
-  facet_wrap(~ demo_race) +
-  labs(
-    x = "Total Sleep Time (hours)",
-    y = "Term GPA",
-    title = "Sleep vs. Cumulative GPA by race"
-  )
 
 #THIS GRAPH
 university_clean |>
@@ -286,11 +246,20 @@ university_clean |>
     y = term_gpa
   )) +
   geom_point() +
-  geom_smooth(method = "lm")
+  geom_smooth(method = "lm", se = FALSE)
 
-university_clean 
 
 
 ```
 
 notes: stem_priv cluster is entirely lower than public cluster
+
+From the graphs above, a few of the key variables seem to have some interaction effects, and a few others do not. The first graph is a scatterplot of the relationship between total sleep time and cumulative GPA, factored by race, where red points were underrepresented students, and blue points were non-underrepresented students. The slopes of the lines best fit for each level are very similar but the slope for the underrepresented students is slightly larger than the slopes for non-underrepresented students, so there might be an interaction effect there that is worth further analysis.
+
+The second graph, is also a scatterplot of the relationship between total sleep time and cumulative GPA, but instead factored by gender, where the red points represent male gender and the blue points represent female gender. The slopes for the line best fit for each level were essentially the same, so there is no obvious interaction effect in this graph that is worth further analysis.
+
+The third graph shows the relationship between a student's term GPA and their total sleep time, but is facet wrapped by the university the student attended. A fourth variable, term_l_cum, is a factor of 0 and 1, where 0 represents that the student's term GPA is greater than or equal to their cumulative GPA, and 1 represents that the student's term GPA is less than their cumulative GPA. This essentially tells us whether the student's term GPA is better or worse than their average GPA. Since this study only collected data during the singular term, this variable will help us determine whether a student with a low term GPA relative to their cumulative GPA is predictive of that student's total sleep time. There are a few interesting things to note of this graph. First, the term GPA of students at the STEM university seem to be more variable than the other two universities, and the total sleep time of the students at the STEM university seem to be on average lower than the other two universities.
+
+In regards to the interaction effects, it seems as if for all three universities there is an interaction effect between students whose term GPA is less than their cumulative and student's whose term GPA is greater than or equal to their cumulative GPA. We assume this, because for all three universities, we fit a line best fit to for both term GPA \< cumulative GPA and vise versa, and the slopes of both lines for all three universities are different. Most notably, for the private catholic university and the public university, the slopes of the level for term GPA \< cumulative GPA is greater than the slopes of the level for term GPA $\ge$ cumulative GPA. This means that there is a potential interaction effect that could be explored further.
+
+Another graph with another potential interaction effect is the sixth graph, which plots the relationship between the mean successive squared difference of bedtimes (bedtime_mssd) and a student's cumulative GPA. The points on this scatterplot were differentiaed by university, with red representing the catholic private university, green representing the public university, and blue representing the STEM private university. We fit the line best fit for each of these levels, and the slope of the line for the catholic private university and the stem private university were essentially the same, but the slope of the line for the public university was slightly smaller, which means there could be a potential interaction effect there that is worth further exploration.
