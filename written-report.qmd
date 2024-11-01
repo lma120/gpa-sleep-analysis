@@ -1,5 +1,5 @@
 ---
-title: "Your project title"
+title: "The relationship between sleep, GPA, and other factors"
 author: "Wale: Liane, Amy, Eshan, Will"
 date: "10/31/24"
 format: pdf
@@ -32,8 +32,6 @@ The data was originally collected in 2019, with the participants being first-yea
 
 There are 634 observations, representing the 634 participants in this study. Race is a binary variable separated into underrepresented students and non-underrepresented students with 0 being underrepresented and 1 being non-underrepresented. Students are considered underrepresented if either parent is Black, Hispanic or Latino, Native American, or Pacific, and students are deemed non-underrepresented if both parents have White or Asian ancestry. The gender of the subject is also binary with 0 being male and 1 being female. First-generation status is binary with 0 being non-first gen and 1 being first-gen. The mean successive squared difference of bedtime measures the bedtime variability, specifically the average of the squared difference of bedtime on consecutive nights.
 
-Clean Data
-
 ```{r}
 university_clean <- university_dataset |>
   mutate(university = case_when(
@@ -48,7 +46,7 @@ university_clean <- university_dataset |>
 # need to continue cleaning for NAs, removing unused variables (ZtoZterm)? also maybe factor(demo firstgen, race, etc)
 ```
 
-Univariate EDA of The Response & Key Predictor Variables
+Univariate EDA of The Response & Key Predictor Variables:
 
 ```{r}
 #| label: univariate-EDA
@@ -171,10 +169,10 @@ university_clean |>
 
 ```
 
-Bivariate EDA of The Response & Key Predictor Variables
+Bivariate EDA of The Response & Key Predictor Variables:
 
 ```{r}
-#WANT THIS GRAPH
+
 university_clean |>
   ggplot(aes(
     x = TotalSleepTime,
@@ -185,7 +183,6 @@ university_clean |>
   geom_smooth(method = "lm", se = FALSE)
 
 
-#WANT THIS GRAPH, NEED TO REMOVE NAs
 university_clean |>
   filter(!is.na(demo_gender)) |>
   ggplot(aes(
@@ -196,7 +193,7 @@ university_clean |>
   geom_point() +
   geom_smooth(method = "lm", se = FALSE)
 
-#LIKE THIS GRAPH
+
 university_clean |>
   mutate(term_l_cum = if_else(term_gpa < cum_gpa, 1, 0))|>
   ggplot(aes(x = term_gpa, y = TotalSleepTime, color = factor(term_l_cum))) +
@@ -205,7 +202,7 @@ university_clean |>
   geom_smooth(method = "lm", se = FALSE) 
 
 
-#THIS GRAPH
+
 university_clean |>
   ggplot(aes(
     x = university,
@@ -220,15 +217,15 @@ university_clean |>
   )
 
 
-#WANT THIS ONE BUT HAVE TO CLEAN
+
 university_clean |>
   ggplot(aes(
     x = as.factor(demo_firstgen),
     y = cum_gpa
   )) +
-  geom_boxplot() #need to clean for first_gen = 2, NA vals?
+  geom_boxplot() 
 
-#WANT THIS ONE
+
 university_clean |>
   ggplot(aes(
     x = bedtime_mssd, 
@@ -239,7 +236,7 @@ university_clean |>
   geom_smooth(method = "lm", se = FALSE)
 
 
-#THIS GRAPH
+
 university_clean |>
   ggplot(aes(
     x = daytime_sleep,
@@ -252,8 +249,6 @@ university_clean |>
 
 ```
 
-notes: stem_priv cluster is entirely lower than public cluster
-
 From the graphs above, a few of the key variables seem to have some interaction effects, and a few others do not. The first graph is a scatterplot of the relationship between total sleep time and cumulative GPA, factored by race, where red points were underrepresented students, and blue points were non-underrepresented students. The slopes of the lines best fit for each level are very similar but the slope for the underrepresented students is slightly larger than the slopes for non-underrepresented students, so there might be an interaction effect there that is worth further analysis.
 
 The second graph, is also a scatterplot of the relationship between total sleep time and cumulative GPA, but instead factored by gender, where the red points represent male gender and the blue points represent female gender. The slopes for the line best fit for each level were essentially the same, so there is no obvious interaction effect in this graph that is worth further analysis.
@@ -262,4 +257,4 @@ The third graph shows the relationship between a student's term GPA and their to
 
 In regards to the interaction effects, it seems as if for all three universities there is an interaction effect between students whose term GPA is less than their cumulative and student's whose term GPA is greater than or equal to their cumulative GPA. We assume this, because for all three universities, we fit a line best fit to for both term GPA \< cumulative GPA and vise versa, and the slopes of both lines for all three universities are different. Most notably, for the private catholic university and the public university, the slopes of the level for term GPA \< cumulative GPA is greater than the slopes of the level for term GPA $\ge$ cumulative GPA. This means that there is a potential interaction effect that could be explored further.
 
-Another graph with another potential interaction effect is the sixth graph, which plots the relationship between the mean successive squared difference of bedtimes (bedtime_mssd) and a student's cumulative GPA. The points on this scatterplot were differentiaed by university, with red representing the catholic private university, green representing the public university, and blue representing the STEM private university. We fit the line best fit for each of these levels, and the slope of the line for the catholic private university and the stem private university were essentially the same, but the slope of the line for the public university was slightly smaller, which means there could be a potential interaction effect there that is worth further exploration.
+Another graph with another potential interaction effect is the sixth graph, which plots the relationship between the mean successive squared difference of bedtimes (bedtime_mssd) and a student's cumulative GPA. The points on this scatterplot were differentiated by university, with red representing the catholic private university, green representing the public university, and blue representing the STEM private university. We fit the line best fit for each of these levels, and the slope of the line for the catholic private university and the stem private university were essentially the same, but the slope of the line for the public university was slightly smaller, which means there could be a potential interaction effect there that is worth further exploration.
