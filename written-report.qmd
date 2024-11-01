@@ -1,5 +1,5 @@
 ---
-title: "The relationship between sleep, GPA, and other factors"
+title: "The relationship between race, gender, first-gen status, and college type for sleep and GPA in college students"
 author: "Wale: Liane, Amy, Eshan, Will"
 date: "10/31/24"
 format: pdf
