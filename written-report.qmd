@@ -14,6 +14,9 @@ editor: visual
 #| label: load packages and data
 library(tidyverse)
 library(GGally)
+library(knitr)
+library(broom)
+
 university_dataset <- read_csv("data/cmu-sleep.csv")
 #glimpse(university_dataset)
 ```
@@ -70,7 +73,7 @@ university_clean |>
        x = "Cumulative GPA",
        y = "Count")
 
-university_clean |>
+termgpa_ss <- university_clean |>
   group_by(university) |>
   summarize(
     mean_tgpa = mean(term_gpa, na.rm = TRUE),
@@ -79,9 +82,11 @@ university_clean |>
     min_tgpa = min(term_gpa, na.rm = TRUE),
     max_tgpa = max(term_gpa, na.rm = TRUE),
     count = n()
-  )
+  ) |>
+  kable(digits = 3)
+termgpa_ss
 
-university_clean |>
+gpa_ss <- university_clean |>
   group_by(university) |>
   summarize(
     mean_cgpa = mean(cum_gpa, na.rm = TRUE),
@@ -90,7 +95,9 @@ university_clean |>
     min_cgpa = min(cum_gpa, na.rm = TRUE),
     max_cgpa = max(cum_gpa, na.rm = TRUE),
     count = n()
-  )
+  ) |>
+  kable(digits = 3)
+gpa_ss
 
 university_clean |>
   ggplot(aes(x = TotalSleepTime)) + 
@@ -157,13 +164,16 @@ university_clean |>
   labs(title = "Distribution of First-generation Status",
        fill = "First-generation Status")
 
-university_clean |>
+na_table <- university_clean |>
   group_by(university) |>
   summarize(
     total_count = n(),
     na_count = sum(is.na(term_units)),
     non_na_count = sum(!is.na(term_units))
-  ) 
+  ) |>
+  kable(digits = 3)
+na_table
+
 #a lot of NA values for the Catholic school -> will not use this variable
 #for analyses
 
@@ -175,12 +185,18 @@ Bivariate EDA of The Response & Key Predictor Variables:
 
 university_clean |>
   ggplot(aes(
-    x = TotalSleepTime,
+    x = TotalSleepTime/60,
     y = cum_gpa,
-    color = as.factor(demo_race)
+    color = factor(demo_race, labels = c("Underrepresented", "Non-Underrepresented"))
   )) +
   geom_point() +
-  geom_smooth(method = "lm", se = FALSE)
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Cumulative GPA vs. Total Sleep Time by Race",
+    x = "Total Sleep Time (hours)",
+    y = "Cumulative GPA /4.0",
+    color = "Underrepresented Status"
+  )
 
 
 university_clean |>
@@ -188,18 +204,53 @@ university_clean |>
   ggplot(aes(
     x = TotalSleepTime,
     y = cum_gpa,
-    color = as.factor(demo_gender)
+    color = factor(demo_race, labels = c("Male", "Female"))
   )) +
   geom_point() +
-  geom_smooth(method = "lm", se = FALSE)
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Cumulative GPA vs. Total Sleep Time by Gender",
+    x = "Total Sleep Time (hours)",
+    y = "Cumulative GPA /4.0",
+    color = "Gender"
+  )
+
+university_clean |>
+  filter(!is.na(demo_firstgen)) |>
+  ggplot(aes(
+    x = TotalSleepTime,
+    y = cum_gpa,
+    color = factor(demo_firstgen, labels = c("Not First-Generation", "First-Generation"))
+  )) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Cumulative GPA vs. Total Sleep Time by First-Generation Status",
+    x = "Total Sleep Time (hours)",
+    y = "Cumulative GPA /4.0",
+    color = "First-Generation Status"
+  )
+
 
 
 university_clean |>
-  mutate(term_l_cum = if_else(term_gpa < cum_gpa, 1, 0))|>
-  ggplot(aes(x = term_gpa, y = TotalSleepTime, color = factor(term_l_cum))) +
-  facet_wrap( ~ university) + 
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) 
+  mutate(threshold_gpa = if_else(term_gpa < cum_gpa, "low", "high"))|>
+  ggplot(aes(x = TotalSleepTime/60, y = term_gpa, color = factor(threshold_gpa))) +
+  facet_wrap(~ university,
+             labeller = labeller(
+              university = c("cath_priv" = "Private (Catholic)",
+                             "public" = "Public",
+                             "stem_priv" = "Private (STEM)"))) + 
+  geom_point(alpha = 0.3) +
+  geom_smooth(aes(color = factor(threshold_gpa)), method = "lm", se = FALSE) +
+  scale_color_manual(values = c("low" = "blue", "high" = "red")) +
+  labs(
+    title = "Relationship between Total Sleep Time and GPA by University Type",
+    x = "Total Sleep Time (hours)",
+    y = "Term GPA /4.0",
+    color = "GPA Threshold"
+    
+  )
 
 
 
@@ -243,7 +294,12 @@ university_clean |>
     y = term_gpa
   )) +
   geom_point() +
-  geom_smooth(method = "lm", se = FALSE)
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Term GPA vs. Daytime Sleep",
+    x = "Daytime Sleep (minutes)",
+    y = "Term GPA /4.0"
+  )
 
 
 
