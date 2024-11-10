@@ -219,15 +219,15 @@ university_clean |>
   filter(!is.na(demo_firstgen)) |>
   ggplot(aes(
     x = TotalSleepTime,
-    y = cum_gpa,
+    y = term_gpa,
     color = factor(demo_firstgen, labels = c("Not First-Generation", "First-Generation"))
   )) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
   labs(
-    title = "Cumulative GPA vs. Total Sleep Time by First-Generation Status",
+    title = "Term GPA vs. Total Sleep Time by First-Generation Status",
     x = "Total Sleep Time (hours)",
-    y = "Cumulative GPA /4.0",
+    y = "Term GPA /4.0",
     color = "First-Generation Status"
   )
 
@@ -301,7 +301,34 @@ university_clean |>
     y = "Term GPA /4.0"
   )
 
+university_clean |>
+  mutate(threshold_gpa = if_else(term_gpa < cum_gpa, "low", "high"))|>
+  ggplot(aes(
+    x = Zterm_units_ZofZ,
+    y = TotalSleepTime,
+    color = university
+  )) + 
+  facet_wrap(~threshold_gpa) +
+  geom_point() +
+  geom_smooth(method = "lm")
 
+university_clean |>
+  mutate(threshold_gpa = if_else(term_gpa < cum_gpa, "low", "high"))|>
+  mutate(daytime_sleep_lvl = if_else(daytime_sleep > 60, "high", "low")) |>
+  ggplot(aes(
+    x = daytime_sleep,
+    y = term_gpa,
+    color = daytime_sleep_lvl 
+  )) +
+  facet_wrap(~threshold_gpa) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Term GPA by Daytime Sleep",
+    x = "Daytime Sleep (minutes)",
+    y = "Term GPA /4.0",
+    color = "Daytime Sleep Length"
+  )
 
 ```
 
