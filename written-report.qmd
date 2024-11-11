@@ -67,11 +67,27 @@ university_clean |>
        y = "Count")
 
 university_clean |>
+  ggplot(aes(x = term_gpa)) +
+  geom_histogram() +
+  labs(title = "Distribution of the Term GPA by University",
+       x = "Term GPA",
+       y = "Count") +
+  facet_wrap(~university)
+
+university_clean |>
   ggplot(aes(x = cum_gpa)) +
   geom_histogram() +
   labs(title = "Distribution of the Cumulative GPA",
        x = "Cumulative GPA",
        y = "Count")
+
+university_clean |>
+  ggplot(aes(x = cum_gpa)) +
+  geom_histogram() +
+  labs(title = "Distribution of the Cumulative GPA by University",
+       x = "Cumulative GPA",
+       y = "Count") +
+  facet_wrap(~university)
 
 termgpa_ss <- university_clean |>
   group_by(university) |>
