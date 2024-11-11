@@ -68,7 +68,7 @@ university_clean |>
 
 university_clean |>
   ggplot(aes(x = term_gpa)) +
-  geom_histogram() +
+  geom_histogram(bins = 12) +
   labs(title = "Distribution of the Term GPA by University",
        x = "Term GPA",
        y = "Count") +
@@ -83,7 +83,7 @@ university_clean |>
 
 university_clean |>
   ggplot(aes(x = cum_gpa)) +
-  geom_histogram() +
+  geom_histogram(bins = 12) +
   labs(title = "Distribution of the Cumulative GPA by University",
        x = "Cumulative GPA",
        y = "Count") +
