@@ -6,6 +6,7 @@ execute:
   warning: false
   message: false
 editor: visual
+bibliography: data/references.bib
 ---
 
 ```{r}
@@ -24,13 +25,11 @@ Academic performance varies widely from student-to-student, likely attributed to
 
 Our research question is: How do differences in sleep, race, gender, university type, and first-generation status affect college first-years’ cumulative GPA?
 
-It is important to determine what factors or combinations of factors can impact students’ GPA, especially for first-years as they transition from high school to university. As college students, we are interested in exploring how academic performance is affected differently by lack of sleep, whether a student goes to a public or private university, and more as many of these issues affect us currently. It is well-known that [sleep impacts students’ academic achievement](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7381801/), but we aim to explore this in terms of the time students went to bed, average sleep time, and more while also accounting for students’ background and the type of university they go to. We hypothesize that the average time in bed will have the largest effect on cumulative GPA and that having less variation in bed time will lead to a higher cumulative GPA. We also anticipate the type of university students attend and first-gen status to have an affect on students' GPA.
+It is important to determine what factors or combinations of factors can impact students’ GPA, especially for first-years as they transition from high school to university. As college students, we are interested in exploring how academic performance is affected differently by lack of sleep, whether a student goes to a public or private university, and more as many of these issues affect us currently. As shown in previous research, sleep impacts students’ academic achievement significantly [@effect_sleep], but we aim to explore this in terms of the time students went to bed, average sleep time, and more while also accounting for students’ background and the type of university they go to. We hypothesize that the average time in bed will have the largest effect on cumulative GPA and that having less variation in bed time will lead to a higher cumulative GPA. We also anticipate the type of university students attend and first-gen status to have an affect on students' GPA.
 
 ## Data description
 
-https://cmustatistics.github.io/data-repository/psychology/cmu-sleep.html
-
-The data was originally collected in 2019, with the participants being first-year students at the following three universities: Carnegie Mellon University (CMU), a STEM-focused private university, The University of Washington (UW), a large public university, and Notre Dame University (ND), a private Catholic university. To collect data on sleep, each participating student was given a Fitbit device to track their sleep and physical activity for a month in the spring term, and grade and demographic data was provided by university registrars.
+The data was originally collected in 2019 [@cmu_sleep], with the participants being first-year students at the following three universities: Carnegie Mellon University (CMU), a STEM-focused private university, The University of Washington (UW), a large public university, and Notre Dame University (ND), a private Catholic university. To collect data on sleep, each participating student was given a Fitbit device to track their sleep and physical activity for a month in the spring term, and grade and demographic data was provided by university registrars.
 
 There are 634 observations, representing the 634 participants in this study. Race is a binary variable separated into underrepresented students and non-underrepresented students with 0 being underrepresented and 1 being non-underrepresented. Students are considered underrepresented if either parent is Black, Hispanic or Latino, Native American, or Pacific, and students are deemed non-underrepresented if both parents have White or Asian ancestry. The gender of the subject is also binary with 0 being male and 1 being female. First-generation status is binary with 0 being non-first gen and 1 being first-gen. The mean successive squared difference of bedtime measures the bedtime variability, specifically the average of the squared difference of bedtime on consecutive nights.
 
@@ -128,4 +127,4 @@ We can use a multiple linear regression technique for this dataset that predicts
 
 ## Data dictionary
 
-The data dictionary can be found [here](ADD%20LINK!!!) \[Update the link and remove this note!\]
+The data dictionary can be found [here](https://github.com/sta221-fa24/project-Wale/blob/main/data/README.md).
