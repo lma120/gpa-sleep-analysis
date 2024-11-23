@@ -87,6 +87,8 @@ university_dataset %>%
    
 ```
 
+Cumulative GPA is left-skewed, with all studies showing a left-skew pattern with varying spreads/IQRs. Most studies show a similar median at around 3.5, though it will be interesting to see if there are greater differences when combining studies by university type.
+
 Some additional visualization options to explore this data in the future could include:
 
 -   Facet-wrapped/color-coded scatterplot by race for average time in bed vs. cumulative GPA
