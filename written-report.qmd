@@ -357,3 +357,85 @@ The third graph shows the relationship between a student's term GPA and their to
 In regards to the interaction effects, it seems as if for all three universities there is an interaction effect between students whose term GPA is less than their cumulative and student's whose term GPA is greater than or equal to their cumulative GPA. We assume this, because for all three universities, we fit a line best fit to for both term GPA \< cumulative GPA and vise versa, and the slopes of both lines for all three universities are different. Most notably, for the private catholic university and the public university, the slopes of the level for term GPA \< cumulative GPA is greater than the slopes of the level for term GPA $\ge$ cumulative GPA. This means that there is a potential interaction effect that could be explored further.
 
 Another graph with another potential interaction effect is the sixth graph, which plots the relationship between the mean successive squared difference of bedtimes (bedtime_mssd) and a student's cumulative GPA. The points on this scatterplot were differentiated by university, with red representing the catholic private university, green representing the public university, and blue representing the STEM private university. We fit the line best fit for each of these levels, and the slope of the line for the catholic private university and the stem private university were essentially the same, but the slope of the line for the public university was slightly smaller, which means there could be a potential interaction effect there that is worth further exploration.
+
+update
+
+Regression Testing
+
+```{r}
+university_clean <- university_clean |>
+  mutate(gpa_split = if_else(
+    cum_gpa >= 3.0, "High GPA", "Low GPA"),
+  threshold_gpa = if_else(term_gpa < cum_gpa, "low", "high"),
+  daytime_sleep_lvl = if_else(daytime_sleep > 60, "high", "low"))
+  
+log_model <- glm(as.factor(gpa_split) ~ TotalSleepTime + university + daytime_sleep_lvl + demo_firstgen + demo_gender + bedtime_mssd + demo_race + threshold_gpa, data = university_clean, family = binomial)
+
+tidy(log_model) |>
+  kable(digits = 3)
+
+```
+
+```{r}
+ggplot(university_clean, aes(x = university, fill = gpa_split)) +
+  geom_bar(position = "dodge") +
+  labs(
+    title = "Distribution of High and Low Cumulative GPA by University Type",
+    x = "University Type",
+    y = "Count",
+    fill = "GPA Split"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+sig_fit <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa, data = university_clean, family = binomial)
+tidy(sig_fit) |>
+  kable(digits = 3)
+
+university_fit1 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime, data = university_clean, family = binomial)
+
+anova(sig_fit, university_fit1, test = "Chisq")
+# TotalSleepTime we should include.
+
+university_fit1 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime, data = university_clean, family = binomial)
+
+anova(sig_fit, university_fit1, test = "Chisq")
+
+```
+
+```{r}
+
+data_ur1 <- tibble(demo_race = 1, university = "stem_priv", threshold_gpa = "high")
+predict.glm(sig_fit, data_ur1, type = "response")
+
+data_ur2 <- tibble(demo_race = 1, university = "cath_priv", threshold_gpa = "high")
+predict.glm(sig_fit, data_ur2, type = "response")
+#why is it so low lol
+
+data_ur3 <- tibble(demo_race = 1, university = "public", threshold_gpa = "high")
+predict.glm(sig_fit, data_ur3, type = "response")
+
+```
+
+predict prob of 21.7% that
+
+-   underrepresented
+
+-   stem
+
+-   that's doing better spring sem than fall sem
+
+has a GPA of at least 3.0.
+
+```{r}
+
+
+```
+
+multicolinearity check for TotalSleepTime and daytime_sleep
+
+Questions:
+
+-   how to dtermine which variables to use in fitted model? trial and error or vif or other methods since we have so many
+-   drop in deviance test to see if high pval variables should be included in model
