@@ -389,7 +389,7 @@ ggplot(university_clean, aes(x = university, fill = gpa_split)) +
 ```
 
 ```{r}
-sig_fit <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa, data = university_clean, family = binomial)
+sig_fit <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa, data = university_clean, family = binomial) #change base to another school
 tidy(sig_fit) |>
   kable(digits = 3)
 
@@ -406,14 +406,14 @@ anova(sig_fit, university_fit1, test = "Chisq")
 
 ```{r}
 
-data_ur1 <- tibble(demo_race = 1, university = "stem_priv", threshold_gpa = "high")
-predict.glm(sig_fit, data_ur1, type = "response")
+data_ur1 <- tibble(demo_race = 0, university = "stem_priv", threshold_gpa = "high") #area under curve, BIC for prediction, hypothesis testing
+predict.glm(sig_fit, data_ur1, type = "response") #interaction term - drop in deviance
 
-data_ur2 <- tibble(demo_race = 1, university = "cath_priv", threshold_gpa = "high")
+data_ur2 <- tibble(demo_race = 0, university = "cath_priv", threshold_gpa = "high")
 predict.glm(sig_fit, data_ur2, type = "response")
 #why is it so low lol
 
-data_ur3 <- tibble(demo_race = 1, university = "public", threshold_gpa = "high")
+data_ur3 <- tibble(demo_race = 0, university = "public", threshold_gpa = "high")
 predict.glm(sig_fit, data_ur3, type = "response")
 
 ```
