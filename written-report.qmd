@@ -12,10 +12,15 @@ editor: visual
 
 ```{r}
 #| label: load packages and data
+library(patchwork)
 library(tidyverse)
 library(GGally)
+library(dplyr)
 library(knitr)
 library(broom)
+library(pROC)
+library(car)
+library(yardstick)
 
 university_dataset <- read_csv("data/cmu-sleep.csv")
 #glimpse(university_dataset)
@@ -96,24 +101,24 @@ termgpa_ss <- university_clean |>
     median_tgpa = median(term_gpa, na.rm = TRUE),
     sd_tgpa = sd(term_gpa, na.rm = TRUE),
     min_tgpa = min(term_gpa, na.rm = TRUE),
-    max_tgpa = max(term_gpa, na.rm = TRUE),
-    count = n()
+   max_tgpa = max(term_gpa, na.rm = TRUE),
+   count = n()
   ) |>
   kable(digits = 3)
 termgpa_ss
 
-gpa_ss <- university_clean |>
+ gpa_ss <- university_clean |>
   group_by(university) |>
-  summarize(
-    mean_cgpa = mean(cum_gpa, na.rm = TRUE),
-    median_cgpa = median(cum_gpa, na.rm = TRUE),
-    sd_cgpa = sd(cum_gpa, na.rm = TRUE),
-    min_cgpa = min(cum_gpa, na.rm = TRUE),
-    max_cgpa = max(cum_gpa, na.rm = TRUE),
-    count = n()
-  ) |>
-  kable(digits = 3)
-gpa_ss
+   summarize(
+     mean_cgpa = mean(cum_gpa, na.rm = TRUE),
+     median_cgpa = median(cum_gpa, na.rm = TRUE),
+     sd_cgpa = sd(cum_gpa, na.rm = TRUE),
+     min_cgpa = min(cum_gpa, na.rm = TRUE),
+     max_cgpa = max(cum_gpa, na.rm = TRUE),
+     count = n()
+   ) |>
+   kable(digits = 3)
+ gpa_ss
 
 university_clean |>
   ggplot(aes(x = TotalSleepTime)) + 
@@ -374,6 +379,8 @@ log_model <- glm(as.factor(gpa_split) ~ TotalSleepTime + university + daytime_sl
 tidy(log_model) |>
   kable(digits = 3)
 
+
+tidy(vif(log_model))
 ```
 
 ```{r}
@@ -397,8 +404,6 @@ university_fit1 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold
 
 anova(sig_fit, university_fit1, test = "Chisq")
 # TotalSleepTime we should include.
-
-university_fit1 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime, data = university_clean, family = binomial)
 
 anova(sig_fit, university_fit1, test = "Chisq")
 
@@ -437,5 +442,150 @@ multicolinearity check for TotalSleepTime and daytime_sleep
 
 Questions:
 
--   how to dtermine which variables to use in fitted model? trial and error or vif or other methods since we have so many
+-   how to determine which variables to use in fitted model? trial and error or vif or other methods since we have so many
 -   drop in deviance test to see if high pval variables should be included in model
+
+$$
+H_0: \beta_{\text{TotalSleepTime}} = 0\\
+H_a: \beta_{\text{TotalSleepTime}} \neq 0
+$$
+
+```{r}
+
+another_model <- glm(as.factor(gpa_split) ~ TotalSleepTime, data = university_clean, family = binomial)
+
+tidy(another_model) |>
+  kable(digits = 3)
+
+
+university_fit1 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime, data = university_clean, family = binomial)
+
+tidy(university_fit1) |>
+  kable(digits = 3)
+
+
+
+```
+
+```{r}
+
+university_fit2 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + demo_firstgen + TotalSleepTime, data = university_clean, family = binomial)
+
+tidy(anova(university_fit1, university_fit2, test = "Chisq"))
+
+university_fit3 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + bedtime_mssd + TotalSleepTime, data = university_clean, family = binomial)
+
+tidy(anova(university_fit1, university_fit3, test = "Chisq"))
+
+university_fit4 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + daytime_sleep_lvl + TotalSleepTime, data = university_clean, family = binomial)
+
+tidy(anova(university_fit1, university_fit4, test = "Chisq"))
+
+
+```
+
+```{r}
+
+vif(university_fit1)
+
+vif(university_fit4)
+
+```
+
+```{r}
+university_final <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + daytime_sleep_lvl, data = university_clean, family = binomial)
+
+
+tidy(vif(university_final))
+
+
+```
+
+No multicollinearity issues with the final model.
+
+ROC:
+
+```{r}
+
+roc_data <- augment(university_final) |>
+  roc_curve('as.factor(gpa_split)', .fitted, event_level = "second")
+
+roc_data1 <- augment(sig_fit) |>
+  roc_curve('as.factor(gpa_split)', .fitted, event_level = "second")
+
+plot1 <- autoplot(roc_data) +
+  ggtitle("ROC Curve - Final Model") +
+  xlab("1 - Specificity") +
+  ylab("Sensitivity")
+
+plot2 <- autoplot(roc_data1) +
+  ggtitle("ROC Curve - Reduced Model") +
+  xlab("1 - Specificity") +
+  ylab("Sensitivity")
+
+combined_plot <- plot1 + plot2
+
+print(combined_plot)
+
+final_aug <- augment(university_final)
+
+
+final_auc <- augment(university_final) |>
+  roc_auc('as.factor(gpa_split)',.fitted,
+            event_level = "second")
+
+sig_auc <- augment(sig_fit) |>
+  roc_auc('as.factor(gpa_split)',.fitted,
+            event_level = "second")
+
+final_auc
+sig_auc
+```
+
+One metric for determining the strength of University_final:
+
+AIC , BIC:
+
+```{r}
+glance(sig_fit)$AIC #reduced
+glance(university_final)$AIC #full
+
+glance(sig_fit)$BIC #reduced
+glance(university_final)$BIC #full
+```
+
+Although the BIC for our final model is higher, because we are looking to predict future gpa levels from these factors, AIC is a more appropriate gauge for determining a better model. The AIC for university_final is lower than the AIC for sig_fit, therefore, we believe that university final is a better model to predict a high or low GPA, based on the factors given in the model.
+
+Another reason why we believe that the university final model is better than the reduced model is because the ROC curve fits the final model better than the reduced model. The area under the curve for the final model is 77.8%, whereas for the reduced model, it is 75.1%. This tells us that the final model maximizes sensitivity and minimizes 1 - specificity better than the reduced model.
+
+Things that still need to be done:
+
+Explain the drop in deviance test results
+
+Explain transformation of variables:
+
+-   daytime sleep lvl
+
+-   gpa_threshold
+
+-   gpa_split
+
+-   university (check this explanation)
+
+Explain why we chose gpa_split as our response variable
+
+Explain how we got to the sig_fit model from the log_model/ why did we choose log_reg
+
+Explain how we got to the university_final model from the sig_fit model
+
+Results Section:
+
+In this section, you will output the final model and include a brief discussion of the model assumptions, diagnostics, and any relevant model fit statistics.
+
+This section also includes initial interpretations and conclusions drawn from the model.
+
+Introduction and data:
+
+methodology:
+
+results:
