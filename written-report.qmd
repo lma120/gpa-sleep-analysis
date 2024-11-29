@@ -560,7 +560,19 @@ Another reason why we believe that the university final model is better than the
 
 Things that still need to be done:
 
-Explain the drop in deviance test results
+Results Section:
+
+In this section, you will output the final model and include a brief discussion of the model assumptions, diagnostics, and any relevant model fit statistics.
+
+This section also includes initial interpretations and conclusions drawn from the model.
+
+**Introduction and data:**
+
+Explain the univariate and bivariate EDA.
+
+(why did we use term gpa, cum gpa and gpa_split as different response variables? how did we decide that gpa_split was the best response variable?)
+
+Explain if there are any interaction terms/ if we should transform any variables.
 
 Explain transformation of variables:
 
@@ -572,20 +584,21 @@ Explain transformation of variables:
 
 -   university (check this explanation)
 
-Explain why we chose gpa_split as our response variable
+**Methodology:**
 
-Explain how we got to the sig_fit model from the log_model/ why did we choose log_reg
+Explain model selection ( Explain how we got to the sig_fit model from the log_model/ why did we choose log_reg
 
-Explain how we got to the university_final model from the sig_fit model
+Explain how we got to the university_final model from the sig_fit model )
 
-Results Section:
+Included in that is:
 
-In this section, you will output the final model and include a brief discussion of the model assumptions, diagnostics, and any relevant model fit statistics.
+-   anova tables
 
-This section also includes initial interpretations and conclusions drawn from the model.
+```{=html}
+<!-- -->
+```
+-   The hypothesis test / drop in deviance test results
 
-Introduction and data:
+**Results:**
 
-methodology:
-
-results:
+Interpret AIC, ROC, AUC, R-squared, adj-R-Squared for final model, explain results/ compare to the sig_fit model.
