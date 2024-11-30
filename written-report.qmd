@@ -64,32 +64,34 @@ Univariate EDA of The Response & Key Predictor Variables:
 #   select(term_gpa, cum_gpa, TotalSleepTime, bedtime_mssd, demo_firstgen, university, daytime_sleep) |>
 #   ggpairs()
 
-university_clean |>
+p1 <- university_clean |>
   ggplot(aes(x = term_gpa)) +
   geom_histogram() +
   labs(title = "Distribution of the Term GPA",
        x = "Term GPA",
        y = "Count")
 
-university_clean |>
+p2 <- university_clean |>
   ggplot(aes(x = term_gpa)) +
   geom_histogram(bins = 12) +
-  labs(title = "Distribution of the Term GPA by University",
+  labs(title = "Distribution of the Term GPA",
+       subtitle = "by University",
        x = "Term GPA",
        y = "Count") +
   facet_wrap(~university)
 
-university_clean |>
+p3 <- university_clean |>
   ggplot(aes(x = cum_gpa)) +
   geom_histogram() +
   labs(title = "Distribution of the Cumulative GPA",
        x = "Cumulative GPA",
        y = "Count")
 
-university_clean |>
+p4 <- university_clean |>
   ggplot(aes(x = cum_gpa)) +
   geom_histogram(bins = 12) +
-  labs(title = "Distribution of the Cumulative GPA by University",
+  labs(title = "Distribution of the Cumulative GPA",
+       subtitle = "by University",
        x = "Cumulative GPA",
        y = "Count") +
   facet_wrap(~university)
@@ -107,7 +109,7 @@ termgpa_ss <- university_clean |>
   kable(digits = 3)
 termgpa_ss
 
- gpa_ss <- university_clean |>
+gpa_ss <- university_clean |>
   group_by(university) |>
    summarize(
      mean_cgpa = mean(cum_gpa, na.rm = TRUE),
@@ -120,36 +122,51 @@ termgpa_ss
    kable(digits = 3)
  gpa_ss
 
-university_clean |>
+p5 <- university_clean |>
   ggplot(aes(x = TotalSleepTime)) + 
   geom_histogram() +
   labs(title = "Distribution of the Total Sleep Time",
        x = "Total Sleep Time in Minutes", #consider switching to hours
-       y = "Count")
+       y = "Count") +
+    theme(
+  plot.title = element_text(size = 10)
+)
 
-university_clean |>
+
+p6 <- university_clean |>
   ggplot(aes(x = bedtime_mssd)) + 
   geom_histogram() +
   labs(title = "Distribution of the Bedtime Variability",
        x = "Mean successive squared difference of bedtime",
-       y = "Count")
+       y = "Count") +
+    theme(
+  plot.title = element_text(size = 10)
+)
 
-university_clean |>
+
+p7 <- university_clean |>
   ggplot(aes(x = frac_nights_with_data)) + 
   geom_histogram() +
   labs(title = "Distribution of the Fraction of Nights With Data",
        x = "Fraction of Nights With Data",
-       y = "Count")
+       y = "Count") +
+    theme(
+  plot.title = element_text(size = 10)
+)
 
-university_clean |>
+
+p8 <- university_clean |>
   ggplot(aes(x = daytime_sleep)) + 
   geom_histogram() +
   labs(title = "Distribution of Daytime Sleep",
        x = "Daytime Sleep in Minutes",
-       y = "Count")
+       y = "Count") +
+    theme(
+  plot.title = element_text(size = 10)
+)
+
   
-  
-university_clean |>
+p9 <- university_clean |>
   group_by(demo_race) |>
   summarise(count = n(), na.rm = TRUE) |>
   mutate(race_percentage = count / sum(count) * 100) |>
@@ -157,12 +174,15 @@ university_clean |>
                             c("Underrepresented", "Non-Underrepresented")))) +
   geom_bar(stat = "identity", width = 1) +
   coord_polar("y", start = 0) +
-  labs(title = "Distribution of Underrepresented Vs. Non-Underrepresented
+  labs(title = "Distribution of \nUnderrepresented Vs. \nNon-Underrepresented\n
        Students",
-       fill = "Race")
+       fill = "Race") + 
+  theme(
+  plot.title = element_text(size = 10)
+)
 
 
-university_clean |>
+p10 <- university_clean |>
   group_by(demo_gender) |>
   summarise(count = n(), na.rm = TRUE) |>
   mutate(gender_percentage = count / sum(count) * 100) |>
@@ -170,10 +190,14 @@ university_clean |>
                             c("Male", "Female")))) +
   geom_bar(stat = "identity", width = 1) +
   coord_polar("y", start = 0) +
-  labs(title = "Distribution of Gender",
-       fill = "Gender") 
+  labs(title = "Distribution of \nGender",
+       fill = "Gender")  + 
+  theme(
+  plot.title = element_text(size = 10)
+)
 
-university_clean |>
+
+p11 <- university_clean |>
   group_by(demo_firstgen) |> 
   summarise(count = n(), na.rm = TRUE) |>
   mutate(firstgen_percentage = count / sum(count) * 100) |>
@@ -182,8 +206,12 @@ university_clean |>
                             c("Non-First Gen", "First Gen")))) +
   geom_bar(stat = "identity", width = 1) +
   coord_polar("y", start = 0) +
-  labs(title = "Distribution of First-generation Status",
-       fill = "First-generation Status")
+  labs(title = "Distribution of \nFirst-generation Status",
+       fill = "First-generation Status") +
+  theme(
+  plot.title = element_text(size = 10)
+)
+
 
 na_table <- university_clean |>
   group_by(university) |>
@@ -195,8 +223,25 @@ na_table <- university_clean |>
   kable(digits = 3)
 na_table
 
+gpa_plots <- (p1 | p2) / (p3 | p4) 
+gpa_plots 
+
+sleep_plots <- (p5 | p6) / (p7 | p8)
+sleep_plots
+
+demographics_plots <- (p9 | p10 | p11) +
+  plot_layout(guides = "collect") +
+  plot_annotation(
+    title = "Demographics Distributions",
+    theme = theme(
+      plot.title = element_text(size = 18, face = "bold", hjust = 0.5, margin = margin(b = 15))
+    )
+  )
+demographics_plots
+
 #a lot of NA values for the Catholic school -> will not use this variable
 #for analyses
+
 
 ```
 
@@ -496,7 +541,7 @@ vif(university_fit4)
 university_final <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + daytime_sleep_lvl, data = university_clean, family = binomial)
 
 
-tidy(vif(university_final))
+vif(university_final)
 
 
 ```
