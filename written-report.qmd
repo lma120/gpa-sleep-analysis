@@ -593,10 +593,6 @@ Explain how we got to the university_final model from the sig_fit model )
 Included in that is:
 
 -   anova tables
-
-```{=html}
-<!-- -->
-```
 -   The hypothesis test / drop in deviance test results
 
 **Results:**
