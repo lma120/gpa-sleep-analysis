@@ -503,60 +503,172 @@ tidy(vif(university_final))
 
 No multicollinearity issues with the final model.
 
-ROC:
+## Results
+
+The final model we determined is:
+
+**\*\*ADD EQUATION**
+
+```{r}
+tidy(university_final)
+```
+
+To confirm that the final model with predictors `university`, `demo_race`, `threshold_gpa`, `TotalSleepTime`, and `daytime_sleep_lvl` is better for predicting a high or low GPA (`gpa_split`) than the reduced model with initial significant predictors `university`, `demo_race`, and `threshold_gpa`, ROC and AUC were calculated for both models and compared.
+
+The final model we chose showed a larger AUC. The area under the curve for the final model is 0.778, whereas for the reduced model it is 0.75, showing that this final model maximizes sensitivity, the True Positive Rate, and minimizes 1 - specificity, the False Positive Rate, slightly better than the reduced model.
 
 ```{r}
 
-roc_data <- augment(university_final) |>
+final_roc <- augment(university_final) |>
   roc_curve('as.factor(gpa_split)', .fitted, event_level = "second")
 
-roc_data1 <- augment(sig_fit) |>
+red_roc <- augment(sig_fit) |>
   roc_curve('as.factor(gpa_split)', .fitted, event_level = "second")
 
-plot1 <- autoplot(roc_data) +
-  ggtitle("ROC Curve - Final Model") +
+combined_plot <- autoplot(red_roc, color = "blue") +
+  ggtitle("ROC Curves: Final Model vs. Reduced Model") +
   xlab("1 - Specificity") +
-  ylab("Sensitivity")
+  ylab("Sensitivity") +
+  geom_line(data = final_roc, aes(x = 1 - specificity, y = sensitivity, color = "Final Model")) + 
+  geom_line(data = red_roc, aes(x = 1 - specificity, y = sensitivity, color = "Reduced Model")) +
+  scale_color_manual(values = c("Final Model" = "red", "Reduced Model" = "black")) +
+  labs(color = "Model")
 
-plot2 <- autoplot(roc_data1) +
-  ggtitle("ROC Curve - Reduced Model") +
-  xlab("1 - Specificity") +
-  ylab("Sensitivity")
+combined_plot
 
-combined_plot <- plot1 + plot2
+fin_aug <- augment(university_final)
 
-print(combined_plot)
-
-final_aug <- augment(university_final)
-
-
-final_auc <- augment(university_final) |>
+final_auc <- fin_aug |>
   roc_auc('as.factor(gpa_split)',.fitted,
             event_level = "second")
 
-sig_auc <- augment(sig_fit) |>
+red_auc <- augment(sig_fit) |>
   roc_auc('as.factor(gpa_split)',.fitted,
             event_level = "second")
 
-final_auc
-sig_auc
+final_auc_value <- final_auc$.estimate
+red_auc_value <- red_auc$.estimate
+
+
+cat("AUC for Reduced Model:", red_auc_value, "\n")
+cat("AUC for Final Model:", final_auc_value, "\n")
 ```
 
-One metric for determining the strength of University_final:
-
-AIC , BIC:
+We also checked AIC and BIC for the reduced and final models:
 
 ```{r}
-glance(sig_fit)$AIC #reduced
-glance(university_final)$AIC #full
 
-glance(sig_fit)$BIC #reduced
-glance(university_final)$BIC #full
+cat("AIC for Reduced Model:", AIC(sig_fit), "\n")
+cat("AIC for Final Model:", AIC(university_final), "\n")
+
+cat("BIC for Reduced Model:", BIC(sig_fit), "\n")
+cat("BIC for Final Model:", BIC(university_final), "\n")
 ```
 
-Although the BIC for our final model is higher, because we are looking to predict future gpa levels from these factors, AIC is a more appropriate gauge for determining a better model. The AIC for university_final is lower than the AIC for sig_fit, therefore, we believe that university final is a better model to predict a high or low GPA, based on the factors given in the model.
+Although the BIC for the final model is higher, because the aim of this study is to determine what combination of predictors works best to predict if a student has a high or low GPA, AIC is a more appropriate gauge for determining a better model. The AIC for the final model of 398.0 is lower than the AIC for the reduced model of 406.3. Therefore, we believe that our final model is a better model to predict a high or low GPA, and the addition of predictors `TotalSleepTime` and `daytime_sleep_lvl` are significant.
 
-Another reason why we believe that the university final model is better than the reduced model is because the ROC curve fits the final model better than the reduced model. The area under the curve for the final model is 77.8%, whereas for the reduced model, it is 75.1%. This tells us that the final model maximizes sensitivity and minimizes 1 - specificity better than the reduced model.
+Finally, we assess the key assumptions of logistic regression within our model. All predictors show a linear relationship with the log-odds:
+
+```{r}
+final_pred <- predict(university_final, type = "link")
+
+ggplot(data = fin_aug, aes(x = TotalSleepTime, y = final_pred)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", color = "blue") + 
+  labs(
+    title = "Logit for TotalSleepTime", 
+    y = "Log-odds(Fitted values)"
+  )
+
+ggplot(data = fin_aug, aes(x = university, y = final_pred)) + 
+  geom_boxplot(fill = "lightblue", color = "black") +  # Boxplot for categorical variables
+    labs(
+    title = "Logit for University", 
+    y = "Log-odds(Fitted values)"
+  )
+
+ggplot(data = fin_aug, aes(x = factor(demo_race), y = final_pred)) + 
+  geom_boxplot(aes(fill = factor(demo_race)), color = "black") +
+    labs(
+    title = "Logit for demo_race", 
+    y = "Log-odds(Fitted values)"
+  )
+
+ggplot(data = fin_aug, aes(x = threshold_gpa, y = final_pred)) + 
+  geom_boxplot(fill = "blue", color = "black") +  # Boxplot for categorical variables
+    labs(
+    title = "Logit for threshold_gpa", 
+    y = "Log-odds(Fitted values)"
+  )
+
+ggplot(data = fin_aug, aes(x = daytime_sleep_lvl, y = final_pred)) + 
+  geom_boxplot(fill = "darkblue", color = "black") +  # Boxplot for categorical variables
+    labs(
+    title = "Logit for daytime_sleep_lvl", 
+    y = "Log-odds(Fitted values)"
+  )
+
+```
+
+There is also no multicollinearity between predictors included in this model as the VIFs are all far below the threshold of 10.
+
+When checking for Cook's Distance, no data points were found to have a Cook's Distance greater than 1, indicating that there are no influential points.
+
+```{r}
+vif(university_final)
+vif(sig_fit)
+
+cooks_d <- cooks.distance(university_final)
+cooks_d_df <- tibble(cooks_d = cooks_d)
+
+inf_points <- cooks_d_df |>
+  filter(cooks_d > 1)
+inf_points
+
+fin_aug |>
+ggplot(aes(x = .fitted, y = .std.resid)) +
+  geom_point(aes(color = .cooksd)) +
+  scale_color_gradient(low = "blue", high = "orange") +
+  labs(x = "Fitted Values", y = "Standardized Residuals", 
+       title = "Standardized Residuals vs. Fitted Values by Sport Type and Cook's Distance",
+       color = "Cook's Distance", shape = "Sport") +
+  geom_hline(yintercept = 0, color = "black")
+```
+
+**INCLUDE GRAPH OR NO?** do we need fitted vs resid or ?
+
+Although logistic regression assumes independence between observations, we grouped our observations by the type of university attended, which could introduce potential correlation between observations by school. However, we continued with logistic regression for the following reasons:
+
+-   We wanted to predict a categorical response variable, high vs. low GPA, from various predictors, and find the best model (from this dataset) to do so.
+
+-   We used `university` as one of the predictor variables to account for differences between observations and it was proven to be a significant predictor of `gpa_split` through our analysis.
+
+**CONFIDENCE MATRIX\*\* not working**
+
+-   after making need to calculate accuracy and misclassification rates
+
+```{r}
+# fin_aug <- augment(university_final)
+# red_aug <- augment(sig_fit)
+# 
+# final_aug$gpa_split <- final_aug$`as.factor(gpa_split)`
+# red_aug$gpa_split <- red_aug$`as.factor(gpa_split)`
+# 
+# 
+# final_pred <- predict(university_final, type = "response")
+# red_pred <- predict(sig_fit, type = "response")
+# 
+# final_class <- if_else(final_pred > 0.5, "first", "second")
+# red_class <- if_else(red_pred > 0.5, "first", "second")
+# 
+# final_aug |>
+#   conf_mat(gpa_split, final_class)
+# 
+# red_aug |>
+#   conf_mat(truth = all_of("as.factor(gpa_split)"), estimate = red_class)
+```
+
+------------------------------------------------------------------------
 
 Things that still need to be done:
 
@@ -597,4 +709,6 @@ Included in that is:
 
 **Results:**
 
-Interpret AIC, ROC, AUC, R-squared, adj-R-Squared for final model, explain results/ compare to the sig_fit model.
+Interpret AIC, ROC, AUC for final model, explain results/ compare to the sig_fit model.
+
+-   can't do R-sq for log reg
