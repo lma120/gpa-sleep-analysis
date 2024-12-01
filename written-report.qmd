@@ -113,6 +113,7 @@ termgpa_ss <- university_clean |>
    max_tgpa = max(term_gpa, na.rm = TRUE),
    count = n()
   ) |>
+  ungroup() |>
   kable(digits = 3)
 termgpa_ss
 
@@ -403,6 +404,17 @@ university_clean |>
     color = "Daytime Sleep Length"
   )
 
+#keep
+ggplot(university_clean, aes(x = university, fill = gpa_split)) +
+  geom_bar(position = "dodge") +
+  labs(
+    title = "Distribution of High and Low Cumulative GPA by University Type",
+    x = "University Type",
+    y = "Count",
+    fill = "GPA Split"
+  ) +
+  theme_minimal()
+
 ```
 
 From the graphs above, a few of the key variables seem to have some interaction effects, and a few others do not. The first graph is a scatterplot of the relationship between total sleep time and cumulative GPA, factored by race, where red points were underrepresented students, and blue points were non-underrepresented students. The slopes of the lines best fit for each level are very similar but the slope for the underrepresented students is slightly larger than the slopes for non-underrepresented students, so there might be an interaction effect there that is worth further analysis.
@@ -417,9 +429,11 @@ Another graph with another potential interaction effect is the sixth graph, whic
 
 We created the variable `daytime_sleep_lvl`, which uses a threshold of 60 minutes to determine whether a student's average daytime sleep is long (high) or short (low).
 
-update
+## Methodology
 
-Methodology
+\[INTRODUCE WHAT IS GOING ON HERE, be more details, what is "this", explain how this relates to research question, specify which predictors are not significant and its bcs pval \> 0.05\]
+
+We decided that the best way to approach this is by transforming GPA into a binary variable where "High" is considered a GPA of over 3, and "Low" is below. Using this transformed response variable, we figured the best way to approach this would be to use a logistic regression model, given the binary nature of the response. We fit this model with essentially every single one of our predictors (seen above). We saw that (by p-value), some of these predictors were not significant, and so we needed to do some more analysis to figure out what was necessary to use in the model.
 
 ```{r}
 university_clean <- university_clean |>
@@ -438,20 +452,6 @@ tidy(vif(log_model))
 ```
 
 ```{r}
-ggplot(university_clean, aes(x = university, fill = gpa_split)) +
-  geom_bar(position = "dodge") +
-  labs(
-    title = "Distribution of High and Low Cumulative GPA by University Type",
-    x = "University Type",
-    y = "Count",
-    fill = "GPA Split"
-  ) +
-  theme_minimal()
-```
-
-We decided that the best way to approach this is by transforming GPA into a binary variable where "High" is considered a GPA of over 3, and "Low" is below. Using this transformed response variable, we figured the best way to approach this would be to use a logistic regression model, given the binary nature of the response. We fit this model with essentially every single one of our predictors (seen above). We saw that (by p-value), some of these predictors were not significant, and so we needed to do some more digging to figure out what was necessary to use in the model.
-
-```{r}
 
 sig_fit <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa, data = university_clean, family = binomial) #change base to another school
 tidy(sig_fit) |>
@@ -467,42 +467,7 @@ anova(sig_fit, university_fit1, test = "Chisq")
 
 ```
 
-We then created a new model, sig_fit, that isolated only the variables that were seen as significant in the output from our original model. However, there were certain variables that we felt were still necessary to assess further, and so we used a Drop-in Deviance test to compare two models, the exact same, except one included TotalSleepTime, and the other didn't. Given TotalSleepTime being central to our entire research motivation, we wanted to investigate further, and our anova table showed us the p-value being 0.004, meaning its inclusion significantly improves the fit of the model.
-
-I think this whole section can be deleted (below).
-
-```{r}
-
-data_ur1 <- tibble(demo_race = 0, university = "stem_priv", threshold_gpa = "high") #area under curve, BIC for prediction, hypothesis testing
-predict.glm(sig_fit, data_ur1, type = "response") #interaction term - drop in deviance
-
-data_ur2 <- tibble(demo_race = 0, university = "cath_priv", threshold_gpa = "high")
-predict.glm(sig_fit, data_ur2, type = "response")
-#why is it so low lol
-
-data_ur3 <- tibble(demo_race = 0, university = "public", threshold_gpa = "high")
-predict.glm(sig_fit, data_ur3, type = "response")
-
-```
-
-predict prob of 21.7% that
-
--   underrepresented
-
--   stem
-
--   that's doing better spring sem than fall sem
-
-has a GPA of at least 3.0.
-
-```{r}
-
-
-```
-
-multicolinearity check for TotalSleepTime and daytime_sleep
-
-Up until here Can be deleted.
+We then created a new model, sig_fit, that isolated only the variables that were significant in the output from our original model. However, there were certain variables that we felt were still necessary to assess further, and so we used a Drop-in Deviance test to compare two models, the exact same, except one included TotalSleepTime, and the other didn't. Given TotalSleepTime being central to our entire research motivation, we wanted to investigate further, and our anova table showed us the p-value being 0.004, meaning its inclusion significantly improves the fit of the model.
 
 $$
 H_0: \beta_{\text{TotalSleepTime}} = 0\\
