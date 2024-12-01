@@ -21,6 +21,7 @@ library(broom)
 library(pROC)
 library(car)
 library(yardstick)
+library(rms)
 
 university_dataset <- read_csv("data/cmu-sleep.csv")
 #glimpse(university_dataset)
@@ -42,7 +43,7 @@ Description of the data set and key variables.
 
 The data was originally collected in 2019, with the participants being first-year students at the following three universities: Carnegie Mellon University (CMU), a STEM-focused private university, The University of Washington (UW), a large public university, and Notre Dame University (ND), a private Catholic university. To collect data on sleep, each participating student was given a Fitbit device to track their sleep and physical activity for a month in the spring term, and grade and demographic data was provided by university registrars.
 
-There are originally 634 observations, representing the 634 participants in this study. We filtered out students whose data was collected less than 50% of the term, leaving us with 588 participants. Race is a binary variable separated into underrepresented students and non-underrepresented students with 0 being underrepresented and 1 being non-underrepresented. Students are considered underrepresented if either parent is Black, Hispanic or Latino, Native American, or Pacific, and students are deemed non-underrepresented if both parents have White or Asian ancestry. The gender of the subject is also binary with 0 being male and 1 being female. First-generation status is binary with 0 being non-first gen and 1 being first-gen. The mean successive squared difference of bedtime measures the bedtime variability, specifically the average of the squared difference of bedtime on consecutive nights. To measure academic performance, we will be using variables `term_gpa` and `cum_gpa` (cumulative GPA) as response variables. Furthermore, we created the variable `gpa_split` which uses a threshold of a 3.0 GPA to determine whether a student has a "low" or "high" GPA.  
+There are originally 634 observations, representing the 634 participants in this study. We filtered out students whose data was collected less than 50% of the term, leaving us with 588 participants. Race is a binary variable separated into underrepresented students and non-underrepresented students with 0 being underrepresented and 1 being non-underrepresented. Students are considered underrepresented if either parent is Black, Hispanic or Latino, Native American, or Pacific, and students are deemed non-underrepresented if both parents have White or Asian ancestry. The gender of the subject is also binary with 0 being male and 1 being female. First-generation status is binary with 0 being non-first gen and 1 being first-gen. The mean successive squared difference of bedtime measures the bedtime variability, specifically the average of the squared difference of bedtime on consecutive nights. To measure academic performance, we will be using variables `term_gpa` and `cum_gpa` (cumulative GPA) as response variables. Furthermore, we created the variable `gpa_split` which uses a threshold of a 3.0 GPA to determine whether a student has a "low" or "high" GPA.
 
 ```{r}
 university_clean <- university_dataset |>
@@ -414,11 +415,11 @@ In regards to the interaction effects, it seems as if for all three universities
 
 Another graph with another potential interaction effect is the sixth graph, which plots the relationship between the mean successive squared difference of bedtimes (bedtime_mssd) and a student's cumulative GPA. The points on this scatterplot were differentiated by university, with red representing the catholic private university, green representing the public university, and blue representing the STEM private university. We fit the line best fit for each of these levels, and the slope of the line for the catholic private university and the stem private university were essentially the same, but the slope of the line for the public university was slightly smaller, which means there could be a potential interaction effect there that is worth further exploration.
 
-We created the variable `daytime_sleep_lvl`, which uses a threshold of 60 minutes to determine whether a student's average daytime sleep is long (high) or short (low). 
+We created the variable `daytime_sleep_lvl`, which uses a threshold of 60 minutes to determine whether a student's average daytime sleep is long (high) or short (low).
 
 update
 
-Regression Testing
+Methodology
 
 ```{r}
 university_clean <- university_clean |>
@@ -448,19 +449,27 @@ ggplot(university_clean, aes(x = university, fill = gpa_split)) +
   theme_minimal()
 ```
 
+We decided that the best way to approach this is by transforming GPA into a binary variable where "High" is considered a GPA of over 3, and "Low" is below. Using this transformed response variable, we figured the best way to approach this would be to use a logistic regression model, given the binary nature of the response. We fit this model with essentially every single one of our predictors (seen above). We saw that (by p-value), some of these predictors were not significant, and so we needed to do some more digging to figure out what was necessary to use in the model.
+
 ```{r}
+
 sig_fit <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa, data = university_clean, family = binomial) #change base to another school
 tidy(sig_fit) |>
   kable(digits = 3)
 
 university_fit1 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime, data = university_clean, family = binomial)
 
+tidy(university_fit1) |>
+  kable(digits = 3)
+
 anova(sig_fit, university_fit1, test = "Chisq")
 # TotalSleepTime we should include.
 
-anova(sig_fit, university_fit1, test = "Chisq")
-
 ```
+
+We then created a new model, sig_fit, that isolated only the variables that were seen as significant in the output from our original model. However, there were certain variables that we felt were still necessary to assess further, and so we used a Drop-in Deviance test to compare two models, the exact same, except one included TotalSleepTime, and the other didn't. Given TotalSleepTime being central to our entire research motivation, we wanted to investigate further, and our anova table showed us the p-value being 0.004, meaning its inclusion significantly improves the fit of the model.
+
+I think this whole section can be deleted (below).
 
 ```{r}
 
@@ -493,10 +502,7 @@ has a GPA of at least 3.0.
 
 multicolinearity check for TotalSleepTime and daytime_sleep
 
-Questions:
-
--   how to determine which variables to use in fitted model? trial and error or vif or other methods since we have so many
--   drop in deviance test to see if high pval variables should be included in model
+Up until here Can be deleted.
 
 $$
 H_0: \beta_{\text{TotalSleepTime}} = 0\\
@@ -522,28 +528,33 @@ tidy(university_fit1) |>
 
 ```{r}
 
+
 university_fit2 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + demo_firstgen + TotalSleepTime, data = university_clean, family = binomial)
 
-tidy(anova(university_fit1, university_fit2, test = "Chisq"))
+anova(university_fit1, university_fit2, test = "Chisq")
 
 university_fit3 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + bedtime_mssd + TotalSleepTime, data = university_clean, family = binomial)
 
-tidy(anova(university_fit1, university_fit3, test = "Chisq"))
+anova(university_fit1, university_fit3, test = "Chisq")
 
 university_fit4 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + daytime_sleep_lvl + TotalSleepTime, data = university_clean, family = binomial)
 
-tidy(anova(university_fit1, university_fit4, test = "Chisq"))
+anova(university_fit1, university_fit4, test = "Chisq")
 
 
 ```
+
+We then repeated this same drop-in deviance process with the "first-gen" demographic variable, the bedtime variable, and the daytime_sleep variable. The p-values generated by the first two ANOVA tables indicate that they do not significantly improve model-fit, however the inclusion of daytime_sleep_lvl does.
 
 ```{r}
 
-vif(university_fit1)
+tidy(vif(university_fit1))
 
-vif(university_fit4)
+tidy(vif(university_fit4))
 
 ```
+
+We then decided to check for multicollinearity given the interconnected nature of some of the variables.
 
 ```{r}
 university_final <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + daytime_sleep_lvl, data = university_clean, family = binomial)
@@ -554,7 +565,7 @@ vif(university_final)
 
 ```
 
-No multicollinearity issues with the final model.
+We renamed the "model_4" from above to be the final model. The VIFs for the levels of university are somewhat high, however they are not above 10, and so are not at a concerning level. In the final draft we can do further investigation into why we are seeing these issues.
 
 ## Results
 
