@@ -712,6 +712,9 @@ Although logistic regression assumes independence between observations, we group
 -   after making need to calculate accuracy and misclassification rates
 
 ```{r}
+
+fin_aug_2 <- augment(university_final)
+confusion_matrix <- table(Predicted = fin_aug)
 # fin_aug <- augment(university_final)
 # red_aug <- augment(sig_fit)
 # 
