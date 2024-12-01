@@ -8,20 +8,21 @@ execute:
   message: false
   echo: false
 editor: visual
+bibliography: data/references.bib
 ---
 
 ```{r}
 #| label: load packages and data
 library(patchwork)
 library(tidyverse)
-library(GGally)
-library(dplyr)
+# library(GGally)
+# library(dplyr)
 library(knitr)
 library(broom)
-library(pROC)
+#library(pROC)
 library(car)
 library(yardstick)
-library(rms)
+#library(rms)
 
 university_dataset <- read_csv("data/cmu-sleep.csv")
 #glimpse(university_dataset)
@@ -404,6 +405,13 @@ university_clean |>
     color = "Daytime Sleep Length"
   )
 
+#mutating variables
+university_clean <- university_clean |>
+  mutate(gpa_split = if_else(
+    cum_gpa >= 3.0, "High GPA", "Low GPA"),
+  threshold_gpa = if_else(term_gpa < cum_gpa, "low", "high"),
+  daytime_sleep_lvl = if_else(daytime_sleep > 60, "high", "low"))
+
 #keep
 ggplot(university_clean, aes(x = university, fill = gpa_split)) +
   geom_bar(position = "dodge") +
@@ -436,11 +444,6 @@ We created the variable `daytime_sleep_lvl`, which uses a threshold of 60 minute
 We decided that the best way to approach this is by transforming GPA into a binary variable where "High" is considered a GPA of over 3, and "Low" is below. Using this transformed response variable, we figured the best way to approach this would be to use a logistic regression model, given the binary nature of the response. We fit this model with essentially every single one of our predictors (seen above). We saw that (by p-value), some of these predictors were not significant, and so we needed to do some more analysis to figure out what was necessary to use in the model.
 
 ```{r}
-university_clean <- university_clean |>
-  mutate(gpa_split = if_else(
-    cum_gpa >= 3.0, "High GPA", "Low GPA"),
-  threshold_gpa = if_else(term_gpa < cum_gpa, "low", "high"),
-  daytime_sleep_lvl = if_else(daytime_sleep > 60, "high", "low"))
   
 log_model <- glm(as.factor(gpa_split) ~ TotalSleepTime + university + daytime_sleep_lvl + demo_firstgen + demo_gender + bedtime_mssd + demo_race + threshold_gpa, data = university_clean, family = binomial)
 
@@ -519,7 +522,7 @@ tidy(vif(university_fit4))
 
 ```
 
-We then decided to check for multicollinearity given the interconnected nature of some of the variables.
+We then decided to check for multicollinearity given the interconnected nature of some of the variables. We had to use GVIF because there are a few categorical predictors used.
 
 ```{r}
 university_final <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + daytime_sleep_lvl, data = university_clean, family = binomial)
@@ -530,7 +533,7 @@ vif(university_final)
 
 ```
 
-We renamed the "model_4" from above to be the final model. The VIFs for the levels of university are somewhat high, however they are not above 10, and so are not at a concerning level. In the final draft we can do further investigation into why we are seeing these issues.
+We renamed the "model_4" from above to be the final model. The VIFs for all variables are not greater than 10 and are very close to 1, so we can confidently assume no multicollinearity.
 
 ## Results
 
@@ -672,14 +675,17 @@ Although logistic regression assumes independence between observations, we group
 
 -   We used `university` as one of the predictor variables to account for differences between observations and it was proven to be a significant predictor of `gpa_split` through our analysis.
 
-**CONFIDENCE MATRIX\*\* not working**
-
--   after making need to calculate accuracy and misclassification rates
+We then looked at the confidence matrix of our model:
 
 ```{r}
 
-fin_aug_2 <- augment(university_final)
-confusion_matrix <- table(Predicted = fin_aug)
+fin_aug <- fin_aug |>
+  mutate(probs = 1/(1+exp(.fitted)),
+         thresh = if_else(probs > 0.5, "High GPA", "Low GPA"))
+
+confusion_matrix <- table(Predicted = fin_aug$thresh, actual = fin_aug$'as.factor(gpa_split)')
+confusion_matrix
+
 # fin_aug <- augment(university_final)
 # red_aug <- augment(sig_fit)
 # 
@@ -700,15 +706,21 @@ confusion_matrix <- table(Predicted = fin_aug)
 #   conf_mat(truth = all_of("as.factor(gpa_split)"), estimate = red_class)
 ```
 
+$$
+accuracy = (507 +7)/(507+3+70+7) = 0.8756
+$$
+
+$$
+misclassification = (3+70)/(507+3+70+7) = 0.1244
+$$
+
+The accuracy of this model with a classification threshold of 0.5 is 0.8756. The misclassification rate of this model with a classification threshold of 0.5 is 0.1244.
+
+Therefore, our model does well in predicting a high or low GPA with our chosen predictors.
+
 ------------------------------------------------------------------------
 
-Things that still need to be done:
-
-Results Section:
-
-In this section, you will output the final model and include a brief discussion of the model assumptions, diagnostics, and any relevant model fit statistics.
-
-This section also includes initial interpretations and conclusions drawn from the model.
+**Things that still need to be done:**
 
 **Introduction and data:**
 
@@ -718,15 +730,7 @@ Explain the univariate and bivariate EDA.
 
 Explain if there are any interaction terms/ if we should transform any variables.
 
-Explain transformation of variables:
-
--   daytime sleep lvl
-
--   gpa_threshold
-
--   gpa_split
-
--   university (check this explanation)
+Choose graphs!!
 
 **Methodology:**
 
