@@ -13,7 +13,6 @@ bibliography: data/references.bib
 
 ```{r}
 #| label: load packages and data
-library(patchwork)
 library(tidyverse)
 # library(GGally)
 # library(dplyr)
@@ -22,17 +21,18 @@ library(broom)
 #library(pROC)
 library(car)
 library(yardstick)
+library(patchwork)
 #library(rms)
 
 university_dataset <- read_csv("data/cmu-sleep.csv")
 #glimpse(university_dataset)
 ```
 
-### **Introduction**
+### **Introduction and Data**
+
+**Project Motivation and Research Question:**
 
 As college students, we are interested in exploring how academic performance is affected differently by lack of sleep, whether a student goes to a public or private university, and more as many of these issues affect us currently. As shown in previous research, sleep impacts students’ academic achievement significantly [@effect_sleep], but we aim to explore this in terms of the time students went to bed, average sleep time, and more while also accounting for students’ background and the type of university they go to. It is generally understood that lower levels of sleep negatively impact academic performance, but we are interested in how this impact varies or might be challenged by different factors and how we may be able to predict academic performance based on different factors. We hypothesize that the average time in bed will have the largest effect on cumulative GPA and that having less variation in bed time will lead to a higher cumulative GPA. We also anticipate the type of university students attend and first-gen status to have an affect on students' GPA. Our research question is as follows: How does sleep impact academic performance across demographics of college students?
-
-### **Exploratory Data Analysis**
 
 **Description of the data set and key variables:**
 
@@ -61,7 +61,7 @@ university_clean <- university_clean |>
 # need to continue cleaning for NAs, removing unused variables (ZtoZterm)? also maybe factor(demo firstgen, race, etc)
 ```
 
-Here, we created a new variable `university`, which combines studies done at the same universities on different years ranging from 2016 to 2019. We also created the variables `gpa split` , `threshold_gpa`, and `daytime_sleep_lvl`. `gpa_split` is a binary variable which classifies a GPA as high if it is above or equal to 3.0, and low if it is below. `threshold_gpa` is a binary variable which classifies GPA as high if a student's term GPA is higher than or equal to their cumulative GPA, and low if it is less than their cumulative GPA. `daytime_sleep_lvl` is a binary variable that uses a threshold of 60 minutes to determine whether a student's average daytime sleep is long (high) or short (low).
+We also created a new variable `university`, which combines studies done at the same universities on different years ranging from 2016 to 2019. We also created the variables `threshold_gpa`, and `daytime_sleep_lvl`. `threshold_gpa` is a binary variable which classifies GPA as "high" if a student's term GPA is higher than or equal to their cumulative GPA, and "low" if it is less than their cumulative GPA. `daytime_sleep_lvl` is a binary variable that uses a threshold of 60 minutes to determine whether a student's average daytime sleep is long (high) or short (low).
 
 **Univariate EDA of The Response & Key Predictor Variables:**
 
@@ -73,7 +73,7 @@ Here, we created a new variable `university`, which combines studies done at the
 #   select(term_gpa, cum_gpa, TotalSleepTime, bedtime_mssd, demo_firstgen, university, daytime_sleep) |>
 #   ggpairs()
 
-p1 <- university_clean |>
+pg1 <- university_clean |>
   ggplot(aes(x = term_gpa)) +
   geom_histogram() +
   labs(title = "Distribution of the Term GPA",
@@ -83,7 +83,7 @@ p1 <- university_clean |>
   plot.title = element_text(size = 12)
 )
 
-p2 <- university_clean |>
+pg2 <- university_clean |>
   ggplot(aes(x = term_gpa)) +
   geom_histogram(bins = 12) +
   labs(title = "Distribution of the Term GPA",
@@ -95,7 +95,7 @@ p2 <- university_clean |>
   plot.title = element_text(size = 12)
 )
 
-p3 <- university_clean |>
+pg3 <- university_clean |>
   ggplot(aes(x = cum_gpa)) +
   geom_histogram() +
   labs(title = "Distribution of the Cumulative GPA",
@@ -105,7 +105,7 @@ p3 <- university_clean |>
   plot.title = element_text(size = 12)
 )
 
-p4 <- university_clean |>
+pg4 <- university_clean |>
   ggplot(aes(x = cum_gpa)) +
   geom_histogram(bins = 12) +
   labs(title = "Distribution of the Cumulative GPA",
@@ -154,7 +154,7 @@ na_table <- university_clean |>
   kable(digits = 3)
 na_table
 
-gpa_plots <- (p1 | p2) / (p3 | p4) 
+gpa_plots <- (pg1 | pg2) / (pg3 | pg4) 
 gpa_plots 
 
 
@@ -164,11 +164,11 @@ gpa_plots
 
 ```
 
-These four graphs show the counts of term GPA and cumulative GPA, split by university type, and all together. One notable points is that there are less 4.0 term GPA at the stem private school than the other two schools, but more 4.0 cumulative GPAs there than the other two schools. This could be due to the fact that classes are harder at stem private schools, so there are less 4.0 term to term than other schools, but the students may be smarter, so overall, there are more students with 4.0 cumulative GPAs. Another notable point is that the distribution of both the term GPA and cumulative GPA are unimodal and left skewed with long tails, but the term GPA has a larger spread than the cumulative GPA.
+These four graphs show the counts of term GPA and cumulative GPA, split by university type, and all together. One notable point is that there are less 4.0 term GPA at the stem private school than the other two schools, but more 4.0 cumulative GPAs there than the other two schools. This could be due to the fact that classes are harder at stem private schools, so there are less 4.0 term to term than other schools, but the students may be smarter, so overall, there are more students with 4.0 cumulative GPAs. Another notable point is that the distribution of both the term GPA and cumulative GPA are unimodal and left skewed with long tails, but the term GPA has a larger spread than the cumulative GPA.
 
 ```{r}
 
-p5 <- university_clean |>
+pg5 <- university_clean |>
   ggplot(aes(x = TotalSleepTime)) + 
   geom_histogram() +
   labs(title = "Distribution of the Total Sleep Time",
@@ -179,7 +179,7 @@ p5 <- university_clean |>
 )
 
 
-p6 <- university_clean |>
+pg6 <- university_clean |>
   ggplot(aes(x = bedtime_mssd)) + 
   geom_histogram() +
   labs(title = "Distribution of the Bedtime Variability",
@@ -190,7 +190,7 @@ p6 <- university_clean |>
 )
 
 
-p7 <- university_clean |>
+pg7 <- university_clean |>
   ggplot(aes(x = frac_nights_with_data)) + 
   geom_histogram() +
   labs(title = "Distribution of the Fraction of Nights With Data",
@@ -201,7 +201,7 @@ p7 <- university_clean |>
 )
 
 
-p8 <- university_clean |>
+pg8 <- university_clean |>
   ggplot(aes(x = daytime_sleep)) + 
   geom_histogram() +
   labs(title = "Distribution of Daytime Sleep",
@@ -211,15 +211,13 @@ p8 <- university_clean |>
   plot.title = element_text(size = 10)
 )
 
-sleep_plots <- (p5 | p6) / (p7 | p8)
-sleep_plots
+sleep_plots <- (pg5 | pg6) / (pg7 | pg8)
+#sleep_plots
 ```
-
-This group of graphs shows the sleep variables we used in our analysis. The top left graph displays the total sleep time in minutes, and is unimodal and symmetric. The top right graph shows the distributino of the average mean successive squared difference (MSSD) of bedtime, which is right-skewed with a long tail. This makes sense, because most people have low bedtime variability, but some people, for example people who enjoy partying in college, may have a large difference in bedtime. The bottom left graph shows the distriubtion of the fraction of nights where data was collected, after the data had been cleaned to remove values less than 50%. This shows that the majority of people collected 90% or more of their sleep data. Finally, the bottom right graphs shows the distribution of the average daytime sleep in minutes, which is unimodal right skewed. This also makes sense, because most people don't nap much, but some people enjoy routine naps.
 
 ```{r}
 
-p9 <- university_clean |>
+pg9 <- university_clean |>
   group_by(demo_race) |>
   summarise(count = n(), na.rm = TRUE) |>
   mutate(race_percentage = count / sum(count) * 100) |>
@@ -235,7 +233,7 @@ p9 <- university_clean |>
 )
 
 
-p10 <- university_clean |>
+pg10 <- university_clean |>
   group_by(demo_gender) |>
   summarise(count = n(), na.rm = TRUE) |>
   mutate(gender_percentage = count / sum(count) * 100) |>
@@ -250,7 +248,7 @@ p10 <- university_clean |>
 )
 
 
-p11 <- university_clean |>
+pg11 <- university_clean |>
   group_by(demo_firstgen) |> 
   summarise(count = n(), na.rm = TRUE) |>
   mutate(firstgen_percentage = count / sum(count) * 100) |>
@@ -265,7 +263,7 @@ p11 <- university_clean |>
   plot.title = element_text(size = 10)
 )
 
-demographics_plots <- (p9 | p10 | p11) +
+demographics_plots <- (pg9 | pg10 | pg11) +
   plot_layout(guides = "collect") +
   plot_annotation(
     theme = theme(
@@ -280,6 +278,8 @@ These three graphs show the distribution of difference demographics in the study
 **Bivariate EDA of The Response & Key Predictor Variables:**
 
 ```{r}
+fig.width = 8
+fig.height = 12
 
 p1 <- university_clean |>
   ggplot(aes(
@@ -502,9 +502,7 @@ Another graph with another potential interaction effect is the sixth graph, whic
 
 ## Methodology
 
-\[INTRODUCE WHAT IS GOING ON HERE, be more details, what is "this", explain how this relates to research question, specify which predictors are not significant and its bcs pval \> 0.05\]
-
-We decided that the best way to approach this is by transforming GPA into a binary variable where "High" is considered a GPA of over 3, and "Low" is below. Using this transformed response variable, we figured the best way to approach this would be to use a logistic regression model, given the binary nature of the response. We fit this model with essentially every single one of our predictors (seen above). We saw that (by p-value), some of these predictors were not significant, and so we needed to do some more analysis to figure out what was necessary to use in the model.
+Our general thought process to try and model out an answer to our research question was to think about GPA as our response variable as stated above. We felt logistic regression was a better choice using our transformed binary gpa variable, gpa_split, where a GPA above 3.0 was considered "High", and below was considered "Low." We were more concerned with understanding and predicting general ranges of academic performance as opposed to a certain GPA mark. To begin, we fit a logistic regression model with all of the variables we spoke of above (demographic variables, sleep-related variables, and a performance variable (threshold GPA)).
 
 ```{r}
   
@@ -512,12 +510,14 @@ log_model <- glm(as.factor(gpa_split) ~ TotalSleepTime + university + daytime_sl
 
 tidy(log_model) |>
   kable(digits = 3)
-
-
-tidy(vif(log_model))
 ```
 
+We saw that (by p-value), some of these predictors were not considered significant, and so we needed to do some more analysis to figure out what was necessary to use in the final model.
+
 ```{r}
+
+university_clean$university <- factor(university_clean$university)
+university_clean$university <- relevel(university_clean$university , ref = "public")
 
 sig_fit <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa, data = university_clean, family = binomial) #change base to another school
 tidy(sig_fit) |>
@@ -535,31 +535,7 @@ anova(sig_fit, university_fit1, test = "Chisq")
 
 We then created a new model, sig_fit, that isolated only the variables that were significant in the output from our original model. However, there were certain variables that we felt were still necessary to assess further, and so we used a Drop-in Deviance test to compare two models, the exact same, except one included TotalSleepTime, and the other didn't. Given TotalSleepTime being central to our entire research motivation, we wanted to investigate further, and our anova table showed us the p-value being 0.004, meaning its inclusion significantly improves the fit of the model.
 
-$$
-H_0: \beta_{\text{TotalSleepTime}} = 0\\
-H_a: \beta_{\text{TotalSleepTime}} \neq 0
-$$
-
 ```{r}
-
-another_model <- glm(as.factor(gpa_split) ~ TotalSleepTime, data = university_clean, family = binomial)
-
-tidy(another_model) |>
-  kable(digits = 3)
-
-
-university_fit1 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime, data = university_clean, family = binomial)
-
-tidy(university_fit1) |>
-  kable(digits = 3)
-
-
-
-```
-
-```{r}
-
-
 university_fit2 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + demo_firstgen + TotalSleepTime, data = university_clean, family = binomial)
 
 anova(university_fit1, university_fit2, test = "Chisq")
@@ -579,9 +555,9 @@ We then repeated this same drop-in deviance process with the "first-gen" demogra
 
 ```{r}
 
-tidy(vif(university_fit1))
+vif(university_fit1)
 
-tidy(vif(university_fit4))
+vif(university_fit4)
 
 ```
 
@@ -596,13 +572,17 @@ vif(university_final)
 
 ```
 
-We renamed the "model_4" from above to be the final model. The VIFs for all variables are not greater than 10 and are very close to 1, so we can confidently assume no multicollinearity.
+This is our final model. The GVIFs (adjusted) for all variables are not greater than 10 and are very close to 1, so we can confidently assume no multicollinearity.
 
 ## Results
 
 The final model we determined is:
 
-**\*\*ADD EQUATION**
+$$
+\text{Logit}(p) = -0.2812 + 2.8255 \cdot \beta_{\text{universitypublic}} + 3.1011 \cdot \beta_{\text{universitystem_priv}} \\
+- 1.0489 \cdot \beta_{\text{demo_race}} - 1.0363 \cdot \beta_{\text{threshold_gpalow}} \\
+- 0.0063 \cdot \beta_{\text{TotalSleepTime}} - 0.6819 \cdot \beta_{\text{daytime_sleep_lvllow}}
+$$
 
 ```{r}
 tidy(university_final)
