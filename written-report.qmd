@@ -23,6 +23,7 @@ library(car)
 library(yardstick)
 library(patchwork)
 #library(rms)
+library(gridExtra)
 
 university_dataset <- read_csv("data/cmu-sleep.csv")
 #glimpse(university_dataset)
@@ -67,7 +68,6 @@ We also created a new variable `university`, which combines studies done at the 
 
 ```{r}
 #| label: univariate-EDA
-
 
 # university_clean |> 
 #   select(term_gpa, cum_gpa, TotalSleepTime, bedtime_mssd, demo_firstgen, university, daytime_sleep) |>
@@ -154,6 +154,7 @@ na_table <- university_clean |>
   kable(digits = 3)
 na_table
 
+
 gpa_plots <- (pg1 | pg2) / (pg3 | pg4) 
 gpa_plots 
 
@@ -179,15 +180,15 @@ pg5 <- university_clean |>
 )
 
 
-pg6 <- university_clean |>
-  ggplot(aes(x = bedtime_mssd)) + 
-  geom_histogram() +
-  labs(title = "Distribution of the Bedtime Variability",
-       x = "Mean successive squared difference of bedtime",
-       y = "Count") +
-    theme(
-  plot.title = element_text(size = 10)
-)
+# pg6 <- university_clean |>
+#   ggplot(aes(x = bedtime_mssd)) + 
+#   geom_histogram() +
+#   labs(title = "Distribution of the Bedtime Variability",
+#        x = "Mean successive squared difference of bedtime",
+#        y = "Count") +
+#     theme(
+#   plot.title = element_text(size = 10)
+# )
 
 
 pg7 <- university_clean |>
@@ -211,75 +212,15 @@ pg8 <- university_clean |>
   plot.title = element_text(size = 10)
 )
 
-sleep_plots <- (pg5 | pg6) / (pg7 | pg8)
+#sleep_plots <- (pg5 | pg6) / (pg7 | pg8)
 #sleep_plots
 ```
-
-```{r}
-
-pg9 <- university_clean |>
-  group_by(demo_race) |>
-  summarise(count = n(), na.rm = TRUE) |>
-  mutate(race_percentage = count / sum(count) * 100) |>
-  ggplot(aes(x = "", y = race_percentage, fill = factor(demo_race, labels =
-                            c("Underrepresented", "Non-Underrepresented")))) +
-  geom_bar(stat = "identity", width = 1) +
-  coord_polar("y", start = 0) +
-  labs(title = "Distribution of \nUnderrepresented Vs. \nNon-Underrepresented\n
-       Students",
-       fill = "Race") + 
-  theme(
-  plot.title = element_text(size = 10)
-)
-
-
-pg10 <- university_clean |>
-  group_by(demo_gender) |>
-  summarise(count = n(), na.rm = TRUE) |>
-  mutate(gender_percentage = count / sum(count) * 100) |>
-  ggplot(aes(x = "", y = gender_percentage, fill = factor(demo_gender, labels =
-                            c("Male", "Female")))) +
-  geom_bar(stat = "identity", width = 1) +
-  coord_polar("y", start = 0) +
-  labs(title = "Distribution of \nGender",
-       fill = "Gender")  + 
-  theme(
-  plot.title = element_text(size = 10)
-)
-
-
-pg11 <- university_clean |>
-  group_by(demo_firstgen) |> 
-  summarise(count = n(), na.rm = TRUE) |>
-  mutate(firstgen_percentage = count / sum(count) * 100) |>
-  ggplot(aes(x = "", y = firstgen_percentage, fill = factor(demo_firstgen,
-                                                            labels =
-                            c("Non-First Gen", "First Gen")))) +
-  geom_bar(stat = "identity", width = 1) +
-  coord_polar("y", start = 0) +
-  labs(title = "Distribution of \nFirst-generation Status",
-       fill = "First-generation Status") +
-  theme(
-  plot.title = element_text(size = 10)
-)
-
-demographics_plots <- (pg9 | pg10 | pg11) +
-  plot_layout(guides = "collect") +
-  plot_annotation(
-    theme = theme(
-      plot.title = element_text(size = 18, face = "bold", hjust = 0.5, margin = margin(b = 15))
-    )
-  )
-demographics_plots
-```
-
-These three graphs show the distribution of difference demographics in the study. About 80% of the students are not underrepresented, around 55% identify as female, and about 20% have first generation college student status.
 
 **Bivariate EDA of The Response & Key Predictor Variables:**
 
 ```{r}
-fig.width = 8
-fig.height = 12
+fig.width = 5
+fig.height = 4
 
 p1 <- university_clean |>
   ggplot(aes(
@@ -296,9 +237,12 @@ p1 <- university_clean |>
     color = "Underrepresented Status"
   ) +
   theme(
-    plot.title = element_text(size = 10, hjust = 0.5),
-    legend.position = "top",
-    aspect.ratio = 1.5 
+    plot.title = element_text(size = 7, hjust = 0.5),
+    legend.position = "bottom",
+    legend.text = element_text(size = 7),
+    legend.title = element_text(size = 7),
+    aspect.ratio = 1.5,
+    legend.direction = "vertical"
   )
 
 
@@ -319,9 +263,12 @@ p2 <- university_clean |>
     color = "Gender"
   ) +
   theme(
-    plot.title = element_text(size = 10, hjust = 0.5),
-    legend.position = "top",
-    aspect.ratio = 1.5 
+    plot.title = element_text(size = 7, hjust = 0.5),
+    legend.text = element_text(size = 7),
+    legend.position = "bottom",
+    legend.title = element_text(size = 7),
+    aspect.ratio = 1.5,
+    legend.direction = "vertical"
   )
 
 
@@ -341,9 +288,12 @@ p3 <- university_clean |>
     color = "First-Generation Status"
   ) +
   theme(
-    plot.title = element_text(size = 10, hjust = 0.5),
-    legend.position = "top",
-    aspect.ratio = 1.5 
+    plot.title = element_text(size = 7, hjust = 0.5),
+    legend.position = "bottom",
+    aspect.ratio = 1.5,
+    legend.text = element_text(size = 7),
+    legend.title = element_text(size = 7),
+    legend.direction = "vertical"
   )
 
 
@@ -419,19 +369,19 @@ p8 <- university_clean |>
     y = "Term GPA /4.0"
   )
 
-p9 <- university_clean |>
-  mutate(threshold_gpa = if_else(term_gpa < cum_gpa, "low", "high"))|>
-  ggplot(aes(
-    x = Zterm_units_ZofZ,
-    y = TotalSleepTime,
-    color = university
-  )) + 
-  facet_wrap(~threshold_gpa) +
-  geom_point() +
-  geom_smooth(method = "lm") +
-   labs(x = "Term Units Z score",
-        y = " Total Sleep Time",
-        title = "Total Sleep Time by Term Units Z-score")
+# p9 <- university_clean |>
+#   mutate(threshold_gpa = if_else(term_gpa < cum_gpa, "low", "high"))|>
+#   ggplot(aes(
+#     x = Zterm_units_ZofZ,
+#     y = TotalSleepTime,
+#     color = university
+#   )) + 
+#   facet_wrap(~threshold_gpa) +
+#   geom_point() +
+#   geom_smooth(method = "lm") +
+#    labs(x = "Term Units Z score",
+#         y = " Total Sleep Time",
+#         title = "Total Sleep Time by Term Units Z-score")
 
 p10 <- university_clean |>
   mutate(threshold_gpa = if_else(term_gpa < cum_gpa, "low", "high"))|>
@@ -449,7 +399,8 @@ p10 <- university_clean |>
     x = "Daytime Sleep (minutes)",
     y = "Term GPA /4.0",
     color = "Daytime Sleep Length"
-  ) 
+  ) +
+  theme(legend.position = "bottom")
 
 #keep
 p12 <- ggplot(university_clean, aes(x = university, fill = gpa_split)) +
@@ -464,29 +415,36 @@ p12 <- ggplot(university_clean, aes(x = university, fill = gpa_split)) +
     plot.title = element_text(size = 10, face = "bold", hjust = 0.5),
     legend.position = "top"
   )
+grid.arrange(p1, p2, p3, ncol = 3)
+grid.arrange(p10, p8, ncol = 2)
+grid.arrange(p4, p7, ncol = 2)
+grid.arrange(p5, p12, ncol = 2)
 
 
 
-demographics_bivariate <- (p1 / p2 / p3) +
-  plot_layout(heights = c(4, 4, 4)) + # Equal height for all rows
-  plot_annotation(
-    title = "Bivariate Analysis of Cumulative GPA and Total Sleep Time",
-    theme = theme(
-      plot.title = element_text(size = 16, face = "bold", hjust = 0.5, margin = margin(b = 15))
-    )
-  )
 
-demographics_bivariate
 
-p1 | p2 | p3
 
-university_bivariate <- (p4 | p5) / (p7 | p12)
+# demographics_bivariate <- (p1 / p2 / p3) +
+#   plot_layout(heights = c(4, 4, 4)) + # Equal height for all rows
+#   plot_annotation(
+#     title = "Bivariate Analysis of Cumulative GPA and Total Sleep Time",
+#     theme = theme(
+#       plot.title = element_text(size = 16, face = "bold", hjust = 0.5, margin = margin(b = 15))
+#     )
+#   )
 
-university_bivariate
+#demographics_bivariate
 
-sleep_bivariate <- (p9 | p10) 
+#p1 | p2 | p3
 
-sleep_bivariate
+#university_bivariate <- (p4 | p5) / (p7 | p12)
+
+#university_bivariate
+
+#sleep_bivariate <- (p9 | p10) 
+
+#sleep_bivariate
 
 ```
 
@@ -553,20 +511,10 @@ anova(university_fit1, university_fit4, test = "Chisq")
 
 We then repeated this same drop-in deviance process with the "first-gen" demographic variable, the bedtime variable, and the daytime_sleep variable. The p-values generated by the first two ANOVA tables indicate that they do not significantly improve model-fit, however the inclusion of daytime_sleep_lvl does.
 
-```{r}
-
-vif(university_fit1)
-
-vif(university_fit4)
-
-```
-
 We then decided to check for multicollinearity given the interconnected nature of some of the variables. We had to use GVIF because there are a few categorical predictors used.
 
 ```{r}
 university_final <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + daytime_sleep_lvl, data = university_clean, family = binomial)
-
-
 vif(university_final)
 
 
@@ -579,9 +527,9 @@ This is our final model. The GVIFs (adjusted) for all variables are not greater 
 The final model we determined is:
 
 $$
-\text{Logit}(p) = -0.2812 + 2.8255 \cdot \beta_{\text{universitypublic}} + 3.1011 \cdot \beta_{\text{universitystem_priv}} \\
-- 1.0489 \cdot \beta_{\text{demo_race}} - 1.0363 \cdot \beta_{\text{threshold_gpalow}} \\
-- 0.0063 \cdot \beta_{\text{TotalSleepTime}} - 0.6819 \cdot \beta_{\text{daytime_sleep_lvllow}}
+Logit(p) = -0.2812 + 2.8255 \times \beta_{universitypublic} + 3.1011 \times \beta_{universitystem\_priv} \\
+- 1.0489 \times \beta_{demo\_race} - 1.0363 \times \beta_{threshold\_gpalow} \\
+- 0.0063 \times \beta_{TotalSleepTime} - 0.6819 \times \beta_{daytime\_sleep\_lvllow}
 $$
 
 ```{r}
@@ -647,75 +595,98 @@ Finally, we assess the key assumptions of logistic regression within our model. 
 ```{r}
 final_pred <- predict(university_final, type = "link")
 
-p1 <- ggplot(data = fin_aug, aes(x = TotalSleepTime, y = final_pred)) + 
+pa1 <- ggplot(data = fin_aug, aes(x = TotalSleepTime, y = final_pred)) + 
   geom_point() + 
   geom_smooth(method = "lm", color = "blue") + 
   labs(
     title = "Logit for TotalSleepTime", 
     y = "Log-odds(Fitted values)"
+  ) + 
+  theme(
+    legend.position = "bottom"
   )
 
-p2 <- ggplot(data = fin_aug, aes(x = university, y = final_pred)) + 
+
+pa2 <- ggplot(data = fin_aug, aes(x = university, y = final_pred)) + 
   geom_boxplot(fill = "lightblue", color = "black") +  # Boxplot for categorical variables
     labs(
     title = "Logit for University", 
     y = "Log-odds(Fitted values)"
+  ) + 
+  theme(
+    legend.position = "bottom"
   )
 
-p3 <- ggplot(data = fin_aug, aes(x = factor(demo_race), y = final_pred)) + 
+
+pa3 <- ggplot(data = fin_aug, aes(x = factor(demo_race), y = final_pred)) + 
   geom_boxplot(aes(fill = factor(demo_race)), color = "black") +
     labs(
     title = "Logit for demo_race", 
     y = "Log-odds(Fitted values)"
+  ) + 
+  theme(
+    legend.position = "bottom"
   )
 
-p4 <- ggplot(data = fin_aug, aes(x = threshold_gpa, y = final_pred)) + 
+
+pa4 <- ggplot(data = fin_aug, aes(x = threshold_gpa, y = final_pred)) + 
   geom_boxplot(fill = "blue", color = "black") +  # Boxplot for categorical variables
     labs(
     title = "Logit for threshold_gpa", 
     y = "Log-odds(Fitted values)"
+  ) + 
+  theme(
+    legend.position = "bottom"
   )
 
-p5 <- ggplot(data = fin_aug, aes(x = daytime_sleep_lvl, y = final_pred)) + 
+
+pa5 <- ggplot(data = fin_aug, aes(x = daytime_sleep_lvl, y = final_pred)) + 
   geom_boxplot(fill = "darkblue", color = "black") +  # Boxplot for categorical variables
     labs(
     title = "Logit for daytime_sleep_lvl", 
     y = "Log-odds(Fitted values)"
+  ) + 
+  theme(
+    legend.position = "bottom"
   )
 
-(p1 | p2 )  
-
-p3 / ( p4 | p5 ) 
+grid.arrange(pa1, pa2, pa3, pa4, pa5, ncol = 3)
 
 
 ```
 
 There is also no multicollinearity between predictors included in this model as the VIFs are all far below the threshold of 10.
 
-When checking for Cook's Distance, no data points were found to have a Cook's Distance greater than 1, indicating that there are no influential points.
+When checking for Cook's Distance, no data points were found to have a Cook's Distance greater than 1 with most far below 1, indicating that there are no influential points.
 
 ```{r}
 vif(university_final)
 vif(sig_fit)
 
 cooks_d <- cooks.distance(university_final)
-cooks_d_df <- tibble(cooks_d = cooks_d)
+cooks_d_df <- tibble(obs = 1:length(cooks_d), cooks_d = cooks_d)
+
 
 inf_points <- cooks_d_df |>
   filter(cooks_d > 1)
 inf_points
 
-fin_aug |>
-ggplot(aes(x = .fitted, y = .std.resid)) +
-  geom_point(aes(color = .cooksd)) +
-  scale_color_gradient(low = "blue", high = "orange") +
-  labs(x = "Fitted Values", y = "Standardized Residuals", 
-       title = "Standardized Residuals vs. Fitted Values by Sport Type and Cook's Distance",
-       color = "Cook's Distance", shape = "Sport") +
-  geom_hline(yintercept = 0, color = "black")
-```
 
-**INCLUDE GRAPH OR NO?** do we need fitted vs resid or ?
+cooks_d_df |>
+  ggplot(aes(
+    x = obs,
+    y = cooks_d
+  )) +
+  geom_point(alpha = 0.3) +
+  geom_hline(yintercept = 1, color = "red", linetype = "dashed") +
+  labs(
+    title = "Cook's Distance",
+    x = "Observation Number",
+    y = "Cook's Distance"
+  ) 
+  
+
+```
 
 Although logistic regression assumes independence between observations, we grouped our observations by the type of university attended, which could introduce potential correlation between observations by school. However, we continued with logistic regression for the following reasons:
 
@@ -766,33 +737,4 @@ The accuracy of this model with a classification threshold of 0.5 is 0.8756. The
 
 Therefore, our model does well in predicting a high or low GPA with our chosen predictors.
 
-------------------------------------------------------------------------
-
-**Things that still need to be done:**
-
-**Introduction and data:**
-
-Explain the univariate and bivariate EDA.
-
-(why did we use term gpa, cum gpa and gpa_split as different response variables? how did we decide that gpa_split was the best response variable?)
-
-Explain if there are any interaction terms/ if we should transform any variables.
-
-Choose graphs!!
-
-**Methodology:**
-
-Explain model selection ( Explain how we got to the sig_fit model from the log_model/ why did we choose log_reg
-
-Explain how we got to the university_final model from the sig_fit model )
-
-Included in that is:
-
--   anova tables
--   The hypothesis test / drop in deviance test results
-
-**Results:**
-
-Interpret AIC, ROC, AUC for final model, explain results/ compare to the sig_fit model.
-
--   can't do R-sq for log reg
+In conclusion, significant factors that impact academic performance are university, underrepresented status, academic performance compared across semesters, total sleep time, and whether or not students napped for over 1 hour during the day.
