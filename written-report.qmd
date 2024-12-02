@@ -28,19 +28,13 @@ university_dataset <- read_csv("data/cmu-sleep.csv")
 #glimpse(university_dataset)
 ```
 
-Your written report goes here!
-
-::: callout-important
-Before you submit, make sure your code chunks are turned off with `echo: false` and there are no warnings or messages with `warning: false` and `message: false` in the YAML.
-:::
-
-Introduction
+### **Introduction**
 
 As college students, we are interested in exploring how academic performance is affected differently by lack of sleep, whether a student goes to a public or private university, and more as many of these issues affect us currently. As shown in previous research, sleep impacts students’ academic achievement significantly [@effect_sleep], but we aim to explore this in terms of the time students went to bed, average sleep time, and more while also accounting for students’ background and the type of university they go to. It is generally understood that lower levels of sleep negatively impact academic performance, but we are interested in how this impact varies or might be challenged by different factors and how we may be able to predict academic performance based on different factors. We hypothesize that the average time in bed will have the largest effect on cumulative GPA and that having less variation in bed time will lead to a higher cumulative GPA. We also anticipate the type of university students attend and first-gen status to have an affect on students' GPA. Our research question is as follows: How does sleep impact academic performance across demographics of college students?
 
-Exploratory Data Analysis
+### **Exploratory Data Analysis**
 
-Description of the data set and key variables.
+**Description of the data set and key variables:**
 
 The data was originally collected in 2019, with the participants being first-year students at the following three universities: Carnegie Mellon University (CMU), a STEM-focused private university, The University of Washington (UW), a large public university, and Notre Dame University (ND), a private Catholic university. To collect data on sleep, each participating student was given a Fitbit device to track their sleep and physical activity for a month in the spring term, and grade and demographic data was provided by university registrars [@cmu_sleep].
 
@@ -57,12 +51,19 @@ university_clean <- university_dataset |>
   filter(demo_firstgen != 2)
 #glimpse(university_clean)
 
+#mutating variables
+university_clean <- university_clean |>
+  mutate(gpa_split = if_else(
+    cum_gpa >= 3.0, "High GPA", "Low GPA"),
+  threshold_gpa = if_else(term_gpa < cum_gpa, "low", "high"),
+  daytime_sleep_lvl = if_else(daytime_sleep > 60, "high", "low"))
+
 # need to continue cleaning for NAs, removing unused variables (ZtoZterm)? also maybe factor(demo firstgen, race, etc)
 ```
 
-Here, we created a new variable `university`, which combines studies done at the same universities on different years ranging from 2016 to 2019.
+Here, we created a new variable `university`, which combines studies done at the same universities on different years ranging from 2016 to 2019. We also created the variables `gpa split` , `threshold_gpa`, and `daytime_sleep_lvl`. `gpa_split` is a binary variable which classifies a GPA as high if it is above or equal to 3.0, and low if it is below. `threshold_gpa` is a binary variable which classifies GPA as high if a student's term GPA is higher than or equal to their cumulative GPA, and low if it is less than their cumulative GPA. `daytime_sleep_lvl` is a binary variable that uses a threshold of 60 minutes to determine whether a student's average daytime sleep is long (high) or short (low).
 
-Univariate EDA of The Response & Key Predictor Variables:
+**Univariate EDA of The Response & Key Predictor Variables:**
 
 ```{r}
 #| label: univariate-EDA
@@ -77,7 +78,10 @@ p1 <- university_clean |>
   geom_histogram() +
   labs(title = "Distribution of the Term GPA",
        x = "Term GPA",
-       y = "Count")
+       y = "Count") + 
+      theme(
+  plot.title = element_text(size = 12)
+)
 
 p2 <- university_clean |>
   ggplot(aes(x = term_gpa)) +
@@ -86,14 +90,20 @@ p2 <- university_clean |>
        subtitle = "by University",
        x = "Term GPA",
        y = "Count") +
-  facet_wrap(~university)
+  facet_wrap(~university) + 
+      theme(
+  plot.title = element_text(size = 12)
+)
 
 p3 <- university_clean |>
   ggplot(aes(x = cum_gpa)) +
   geom_histogram() +
   labs(title = "Distribution of the Cumulative GPA",
        x = "Cumulative GPA",
-       y = "Count")
+       y = "Count") +
+      theme(
+  plot.title = element_text(size = 12)
+)
 
 p4 <- university_clean |>
   ggplot(aes(x = cum_gpa)) +
@@ -102,7 +112,10 @@ p4 <- university_clean |>
        subtitle = "by University",
        x = "Cumulative GPA",
        y = "Count") +
-  facet_wrap(~university)
+  facet_wrap(~university) +
+      theme(
+  plot.title = element_text(size = 12)
+)
 
 termgpa_ss <- university_clean |>
   group_by(university) |>
@@ -130,6 +143,30 @@ gpa_ss <- university_clean |>
    ) |>
    kable(digits = 3)
  gpa_ss
+
+na_table <- university_clean |>
+  group_by(university) |>
+  summarize(
+    total_count = n(),
+    na_count = sum(is.na(term_units)),
+    non_na_count = sum(!is.na(term_units))
+  ) |>
+  kable(digits = 3)
+na_table
+
+gpa_plots <- (p1 | p2) / (p3 | p4) 
+gpa_plots 
+
+
+#a lot of NA values for the Catholic school -> will not use this variable
+#for analyses
+
+
+```
+
+These four graphs show the counts of term GPA and cumulative GPA, split by university type, and all together. One notable points is that there are less 4.0 term GPA at the stem private school than the other two schools, but more 4.0 cumulative GPAs there than the other two schools. This could be due to the fact that classes are harder at stem private schools, so there are less 4.0 term to term than other schools, but the students may be smarter, so overall, there are more students with 4.0 cumulative GPAs. Another notable point is that the distribution of both the term GPA and cumulative GPA are unimodal and left skewed with long tails, but the term GPA has a larger spread than the cumulative GPA.
+
+```{r}
 
 p5 <- university_clean |>
   ggplot(aes(x = TotalSleepTime)) + 
@@ -174,7 +211,14 @@ p8 <- university_clean |>
   plot.title = element_text(size = 10)
 )
 
-  
+sleep_plots <- (p5 | p6) / (p7 | p8)
+sleep_plots
+```
+
+This group of graphs shows the sleep variables we used in our analysis. The top left graph displays the total sleep time in minutes, and is unimodal and symmetric. The top right graph shows the distributino of the average mean successive squared difference (MSSD) of bedtime, which is right-skewed with a long tail. This makes sense, because most people have low bedtime variability, but some people, for example people who enjoy partying in college, may have a large difference in bedtime. The bottom left graph shows the distriubtion of the fraction of nights where data was collected, after the data had been cleaned to remove values less than 50%. This shows that the majority of people collected 90% or more of their sleep data. Finally, the bottom right graphs shows the distribution of the average daytime sleep in minutes, which is unimodal right skewed. This also makes sense, because most people don't nap much, but some people enjoy routine naps.
+
+```{r}
+
 p9 <- university_clean |>
   group_by(demo_race) |>
   summarise(count = n(), na.rm = TRUE) |>
@@ -221,44 +265,23 @@ p11 <- university_clean |>
   plot.title = element_text(size = 10)
 )
 
-
-na_table <- university_clean |>
-  group_by(university) |>
-  summarize(
-    total_count = n(),
-    na_count = sum(is.na(term_units)),
-    non_na_count = sum(!is.na(term_units))
-  ) |>
-  kable(digits = 3)
-na_table
-
-gpa_plots <- (p1 | p2) / (p3 | p4) 
-gpa_plots 
-
-sleep_plots <- (p5 | p6) / (p7 | p8)
-sleep_plots
-
 demographics_plots <- (p9 | p10 | p11) +
   plot_layout(guides = "collect") +
   plot_annotation(
-    title = "Demographics Distributions",
     theme = theme(
       plot.title = element_text(size = 18, face = "bold", hjust = 0.5, margin = margin(b = 15))
     )
   )
 demographics_plots
-
-#a lot of NA values for the Catholic school -> will not use this variable
-#for analyses
-
-
 ```
 
-Bivariate EDA of The Response & Key Predictor Variables:
+These three graphs show the distribution of difference demographics in the study. About 80% of the students are not underrepresented, around 55% identify as female, and about 20% have first generation college student status.
+
+**Bivariate EDA of The Response & Key Predictor Variables:**
 
 ```{r}
 
-university_clean |>
+p1 <- university_clean |>
   ggplot(aes(
     x = TotalSleepTime/60,
     y = cum_gpa,
@@ -267,14 +290,20 @@ university_clean |>
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
   labs(
-    title = "Cumulative GPA vs. Total Sleep Time by Race",
+    title = "Cumulative GPA vs. Total Sleep Time \n by Race",
     x = "Total Sleep Time (hours)",
     y = "Cumulative GPA /4.0",
     color = "Underrepresented Status"
+  ) +
+  theme(
+    plot.title = element_text(size = 10, hjust = 0.5),
+    legend.position = "top",
+    aspect.ratio = 1.5 
   )
 
 
-university_clean |>
+
+p2 <- university_clean |>
   filter(!is.na(demo_gender)) |>
   ggplot(aes(
     x = TotalSleepTime,
@@ -284,31 +313,41 @@ university_clean |>
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
   labs(
-    title = "Cumulative GPA vs. Total Sleep Time by Gender",
+    title = "Cumulative GPA vs. Total Sleep Time \n by Gender",
     x = "Total Sleep Time (hours)",
     y = "Cumulative GPA /4.0",
     color = "Gender"
+  ) +
+  theme(
+    plot.title = element_text(size = 10, hjust = 0.5),
+    legend.position = "top",
+    aspect.ratio = 1.5 
   )
 
-university_clean |>
+
+p3 <- university_clean |>
   filter(!is.na(demo_firstgen)) |>
   ggplot(aes(
     x = TotalSleepTime,
-    y = term_gpa,
+    y = cum_gpa,
     color = factor(demo_firstgen, labels = c("Not First-Generation", "First-Generation"))
   )) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
   labs(
-    title = "Term GPA vs. Total Sleep Time by First-Generation Status",
+    title = "Cumulative GPA vs. Total Sleep Time \n by First-Generation Status",
     x = "Total Sleep Time (hours)",
-    y = "Term GPA /4.0",
+    y = "Cumulative GPA /4.0",
     color = "First-Generation Status"
+  ) +
+  theme(
+    plot.title = element_text(size = 10, hjust = 0.5),
+    legend.position = "top",
+    aspect.ratio = 1.5 
   )
 
 
-
-university_clean |>
+p4 <- university_clean |>
   mutate(threshold_gpa = if_else(term_gpa < cum_gpa, "low", "high"))|>
   ggplot(aes(x = TotalSleepTime/60, y = term_gpa, color = factor(threshold_gpa))) +
   facet_wrap(~ university,
@@ -320,16 +359,18 @@ university_clean |>
   geom_smooth(aes(color = factor(threshold_gpa)), method = "lm", se = FALSE) +
   scale_color_manual(values = c("low" = "blue", "high" = "red")) +
   labs(
-    title = "Relationship between Total Sleep Time and GPA by University Type",
+    title = "Relationship between Total Sleep Time \n and GPA by University Type",
     x = "Total Sleep Time (hours)",
     y = "Term GPA /4.0",
     color = "GPA Threshold"
-    
+ ) +
+    theme(
+    plot.title = element_text(size = 10, face = "bold", hjust = 0.5),
+    legend.position = "top"
   )
 
 
-
-university_clean |>
+p5 <- university_clean |>
   ggplot(aes(
     x = university,
     y = cum_gpa,
@@ -337,33 +378,35 @@ university_clean |>
   )) +
   geom_boxplot() +
   labs(
-    title = "Distribution of Cumulative GPA by University",
+    title = "Distribution of Cumulative GPA \n by University",
     x = "University",
     y = "Cumulative GPA"
+  ) +
+    theme(
+    plot.title = element_text(size = 10, face = "bold", hjust = 0.5),
+    legend.position = "top"
   )
 
 
-
-university_clean |>
-  ggplot(aes(
-    x = as.factor(demo_firstgen),
-    y = cum_gpa
-  )) +
-  geom_boxplot() 
-
-
-university_clean |>
+p7 <- university_clean |>
   ggplot(aes(
     x = bedtime_mssd, 
     y = cum_gpa, 
     color = university
   )) +
-  geom_point(alpha = 0.6) +
-  geom_smooth(method = "lm", se = FALSE)
+  geom_point(alpha = 0.6) + 
+  geom_smooth(method = "lm", se = FALSE) + 
+  labs(x = "Bedtime MSSD",
+       y = " Cumulative GPA/4.0",
+       title = "Relationship between Bedtime MSSD \n and Cumulative GPA" ) +
+    theme(
+    plot.title = element_text(size = 10, face = "bold", hjust = 0.5),
+    legend.position = "top"
+  )
 
 
 
-university_clean |>
+p8 <- university_clean |>
   ggplot(aes(
     x = daytime_sleep,
     y = term_gpa
@@ -376,7 +419,7 @@ university_clean |>
     y = "Term GPA /4.0"
   )
 
-university_clean |>
+p9 <- university_clean |>
   mutate(threshold_gpa = if_else(term_gpa < cum_gpa, "low", "high"))|>
   ggplot(aes(
     x = Zterm_units_ZofZ,
@@ -385,9 +428,12 @@ university_clean |>
   )) + 
   facet_wrap(~threshold_gpa) +
   geom_point() +
-  geom_smooth(method = "lm")
+  geom_smooth(method = "lm") +
+   labs(x = "Term Units Z score",
+        y = " Total Sleep Time",
+        title = "Total Sleep Time by Term Units Z-score")
 
-university_clean |>
+p10 <- university_clean |>
   mutate(threshold_gpa = if_else(term_gpa < cum_gpa, "low", "high"))|>
   mutate(daytime_sleep_lvl = if_else(daytime_sleep > 60, "high", "low")) |>
   ggplot(aes(
@@ -403,25 +449,44 @@ university_clean |>
     x = "Daytime Sleep (minutes)",
     y = "Term GPA /4.0",
     color = "Daytime Sleep Length"
-  )
-
-#mutating variables
-university_clean <- university_clean |>
-  mutate(gpa_split = if_else(
-    cum_gpa >= 3.0, "High GPA", "Low GPA"),
-  threshold_gpa = if_else(term_gpa < cum_gpa, "low", "high"),
-  daytime_sleep_lvl = if_else(daytime_sleep > 60, "high", "low"))
+  ) 
 
 #keep
-ggplot(university_clean, aes(x = university, fill = gpa_split)) +
+p12 <- ggplot(university_clean, aes(x = university, fill = gpa_split)) +
   geom_bar(position = "dodge") +
   labs(
-    title = "Distribution of High and Low Cumulative GPA by University Type",
+    title = "Distribution of High and Low \n Cumulative GPA by University Type",
     x = "University Type",
     y = "Count",
     fill = "GPA Split"
   ) +
-  theme_minimal()
+    theme(
+    plot.title = element_text(size = 10, face = "bold", hjust = 0.5),
+    legend.position = "top"
+  )
+
+
+
+demographics_bivariate <- (p1 / p2 / p3) +
+  plot_layout(heights = c(4, 4, 4)) + # Equal height for all rows
+  plot_annotation(
+    title = "Bivariate Analysis of Cumulative GPA and Total Sleep Time",
+    theme = theme(
+      plot.title = element_text(size = 16, face = "bold", hjust = 0.5, margin = margin(b = 15))
+    )
+  )
+
+demographics_bivariate
+
+p1 | p2 | p3
+
+university_bivariate <- (p4 | p5) / (p7 | p12)
+
+university_bivariate
+
+sleep_bivariate <- (p9 | p10) 
+
+sleep_bivariate
 
 ```
 
@@ -434,8 +499,6 @@ The third graph shows the relationship between a student's term GPA and their to
 In regards to the interaction effects, it seems as if for all three universities there is an interaction effect between students whose term GPA is less than their cumulative and student's whose term GPA is greater than or equal to their cumulative GPA. We assume this, because for all three universities, we fit a line best fit to for both term GPA \< cumulative GPA and vise versa, and the slopes of both lines for all three universities are different. Most notably, for the private catholic university and the public university, the slopes of the level for term GPA \< cumulative GPA is greater than the slopes of the level for term GPA $\ge$ cumulative GPA. This means that there is a potential interaction effect that could be explored further.
 
 Another graph with another potential interaction effect is the sixth graph, which plots the relationship between the mean successive squared difference of bedtimes (bedtime_mssd) and a student's cumulative GPA. The points on this scatterplot were differentiated by university, with red representing the catholic private university, green representing the public university, and blue representing the STEM private university. We fit the line best fit for each of these levels, and the slope of the line for the catholic private university and the stem private university were essentially the same, but the slope of the line for the public university was slightly smaller, which means there could be a potential interaction effect there that is worth further exploration.
-
-We created the variable `daytime_sleep_lvl`, which uses a threshold of 60 minutes to determine whether a student's average daytime sleep is long (high) or short (low).
 
 ## Methodology
 
@@ -604,7 +667,7 @@ Finally, we assess the key assumptions of logistic regression within our model. 
 ```{r}
 final_pred <- predict(university_final, type = "link")
 
-ggplot(data = fin_aug, aes(x = TotalSleepTime, y = final_pred)) + 
+p1 <- ggplot(data = fin_aug, aes(x = TotalSleepTime, y = final_pred)) + 
   geom_point() + 
   geom_smooth(method = "lm", color = "blue") + 
   labs(
@@ -612,33 +675,38 @@ ggplot(data = fin_aug, aes(x = TotalSleepTime, y = final_pred)) +
     y = "Log-odds(Fitted values)"
   )
 
-ggplot(data = fin_aug, aes(x = university, y = final_pred)) + 
+p2 <- ggplot(data = fin_aug, aes(x = university, y = final_pred)) + 
   geom_boxplot(fill = "lightblue", color = "black") +  # Boxplot for categorical variables
     labs(
     title = "Logit for University", 
     y = "Log-odds(Fitted values)"
   )
 
-ggplot(data = fin_aug, aes(x = factor(demo_race), y = final_pred)) + 
+p3 <- ggplot(data = fin_aug, aes(x = factor(demo_race), y = final_pred)) + 
   geom_boxplot(aes(fill = factor(demo_race)), color = "black") +
     labs(
     title = "Logit for demo_race", 
     y = "Log-odds(Fitted values)"
   )
 
-ggplot(data = fin_aug, aes(x = threshold_gpa, y = final_pred)) + 
+p4 <- ggplot(data = fin_aug, aes(x = threshold_gpa, y = final_pred)) + 
   geom_boxplot(fill = "blue", color = "black") +  # Boxplot for categorical variables
     labs(
     title = "Logit for threshold_gpa", 
     y = "Log-odds(Fitted values)"
   )
 
-ggplot(data = fin_aug, aes(x = daytime_sleep_lvl, y = final_pred)) + 
+p5 <- ggplot(data = fin_aug, aes(x = daytime_sleep_lvl, y = final_pred)) + 
   geom_boxplot(fill = "darkblue", color = "black") +  # Boxplot for categorical variables
     labs(
     title = "Logit for daytime_sleep_lvl", 
     y = "Log-odds(Fitted values)"
   )
+
+(p1 | p2 )  
+
+p3 / ( p4 | p5 ) 
+
 
 ```
 
