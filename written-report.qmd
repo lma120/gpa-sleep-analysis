@@ -592,7 +592,7 @@ Although the BIC for the final model is higher, because the aim of this study is
 
 Finally, we assess the key assumptions of logistic regression within our model. All predictors show a linear relationship with the log-odds:
 
-```{r}
+```{r, fig.width=15, fig.height=8}
 final_pred <- predict(university_final, type = "link")
 
 pa1 <- ggplot(data = fin_aug, aes(x = TotalSleepTime, y = final_pred)) + 
@@ -603,7 +603,10 @@ pa1 <- ggplot(data = fin_aug, aes(x = TotalSleepTime, y = final_pred)) +
     y = "Log-odds(Fitted values)"
   ) + 
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 15),       
+    axis.text = element_text(size = 15)
   )
 
 
@@ -614,7 +617,10 @@ pa2 <- ggplot(data = fin_aug, aes(x = university, y = final_pred)) +
     y = "Log-odds(Fitted values)"
   ) + 
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 15),       
+    axis.text = element_text(size = 15)
   )
 
 
@@ -625,7 +631,12 @@ pa3 <- ggplot(data = fin_aug, aes(x = factor(demo_race), y = final_pred)) +
     y = "Log-odds(Fitted values)"
   ) + 
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 15),       
+    axis.text = element_text(size = 15),
+    legend.text = element_text(size = 15),    
+    legend.title = element_text(size = 15)
   )
 
 
@@ -636,7 +647,10 @@ pa4 <- ggplot(data = fin_aug, aes(x = threshold_gpa, y = final_pred)) +
     y = "Log-odds(Fitted values)"
   ) + 
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 15),       
+    axis.text = element_text(size = 15)
   )
 
 
@@ -647,7 +661,10 @@ pa5 <- ggplot(data = fin_aug, aes(x = daytime_sleep_lvl, y = final_pred)) +
     y = "Log-odds(Fitted values)"
   ) + 
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 15),       
+    axis.text = element_text(size = 15)
   )
 
 grid.arrange(pa1, pa2, pa3, pa4, pa5, ncol = 3)
