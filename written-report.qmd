@@ -37,9 +37,9 @@ As college students, we are interested in exploring how academic performance is 
 
 **Description of the data set and key variables:**
 
-The data was originally collected in 2019, with the participants being first-year students at the following three universities: Carnegie Mellon University (CMU), a STEM-focused private university, The University of Washington (UW), a large public university, and Notre Dame University (ND), a private Catholic university. To collect data on sleep, each participating student was given a Fitbit device to track their sleep and physical activity for a month in the spring term, and grade and demographic data was provided by university registrars [@cmu_sleep].
+The data was originally collected with participants being first-year students at the following three universities: Carnegie Mellon University (CMU), a STEM-focused private university, The University of Washington (UW), a large public university, and Notre Dame University (ND), a private Catholic university. To collect data on sleep, each participating student was given a device to track their sleep and physical activity for a month in the spring term, and demographic data was provided by university registrars [@cmu_sleep].
 
-There are originally 634 observations, representing the 634 participants in this study. We filtered out students whose data was collected less than 50% of the term, leaving us with 588 participants. Race is a binary variable separated into underrepresented students and non-underrepresented students with 0 being underrepresented and 1 being non-underrepresented. Students are considered underrepresented if either parent is Black, Hispanic or Latino, Native American, or Pacific, and students are deemed non-underrepresented if both parents have White or Asian ancestry. The gender of the subject is also binary with 0 being male and 1 being female. First-generation status is binary with 0 being non-first gen and 1 being first-gen. The mean successive squared difference of bedtime measures the bedtime variability, specifically the average of the squared difference of bedtime on consecutive nights. To measure academic performance, we will be using variables `term_gpa` and `cum_gpa` (cumulative GPA) as response variables. Furthermore, we created the variable `gpa_split` which uses a threshold of a 3.0 GPA to determine whether a student has a "low" or "high" GPA.
+There were originally 634 observations, representing the 634 participants in this study. We filtered out students whose data was collected less than 50% of the term, leaving us with 588 participants. `demo_race`is a binary variable with 0 being underrepresented students and 1 being non-underrepresented students. Students are considered underrepresented if either parent is Black, Hispanic or Latino, Native American, or Pacific, and students are deemed non-underrepresented if both parents have White or Asian ancestry. The gender of the subject is also binary with 0 being male and 1 being female. First-generation status is binary with 0 being non-first gen and 1 being first-gen. The mean successive squared difference of bedtime measures the bedtime variability, specifically the average of the squared difference of bedtime on consecutive nights. To measure academic performance, we will be using variables `term_gpa` and `cum_gpa` (cumulative GPA) as response variables. Furthermore, we created the variable `gpa_split` which uses a threshold of a 3.0 GPA to determine whether a student has a "low" or "high" GPA.
 
 ```{r}
 university_clean <- university_dataset |>
@@ -80,7 +80,10 @@ pg1 <- university_clean |>
        x = "Term GPA",
        y = "Count") + 
       theme(
-  plot.title = element_text(size = 12)
+        plot.title = element_text(size = 9),
+        plot.subtitle = element_text(size = 7),
+        axis.title.x = element_text(size = 7),
+        axis.title.y = element_text(size = 7)
 )
 
 pg2 <- university_clean |>
@@ -92,7 +95,10 @@ pg2 <- university_clean |>
        y = "Count") +
   facet_wrap(~university) + 
       theme(
-  plot.title = element_text(size = 12)
+        plot.title = element_text(size = 9),
+        plot.subtitle = element_text(size = 7),
+        axis.title.x = element_text(size = 7),
+        axis.title.y = element_text(size = 7)
 )
 
 pg3 <- university_clean |>
@@ -102,7 +108,9 @@ pg3 <- university_clean |>
        x = "Cumulative GPA",
        y = "Count") +
       theme(
-  plot.title = element_text(size = 12)
+  plot.title = element_text(size = 9),
+        axis.title.x = element_text(size = 7),
+        axis.title.y = element_text(size = 7)
 )
 
 pg4 <- university_clean |>
@@ -114,7 +122,10 @@ pg4 <- university_clean |>
        y = "Count") +
   facet_wrap(~university) +
       theme(
-  plot.title = element_text(size = 12)
+  plot.title = element_text(size = 9),
+        axis.title.x = element_text(size = 7),
+        axis.title.y = element_text(size = 7),
+  plot.subtitle = element_text(size = 7)
 )
 
 termgpa_ss <- university_clean |>
@@ -237,14 +248,15 @@ p1 <- university_clean |>
     color = "Underrepresented Status"
   ) +
   theme(
-    plot.title = element_text(size = 7, hjust = 0.5),
+    plot.title = element_text(size = 7, hjust = 0.5, face = "bold"),
     legend.position = "bottom",
     legend.text = element_text(size = 7),
     legend.title = element_text(size = 7),
     aspect.ratio = 1.5,
+    axis.title.x = element_text(size = 7),
+    axis.title.y = element_text(size = 7),
     legend.direction = "vertical"
   )
-
 
 
 p2 <- university_clean |>
@@ -263,12 +275,14 @@ p2 <- university_clean |>
     color = "Gender"
   ) +
   theme(
-    plot.title = element_text(size = 7, hjust = 0.5),
+    plot.title = element_text(size = 7, hjust = 0.5, face = "bold"),
     legend.text = element_text(size = 7),
     legend.position = "bottom",
     legend.title = element_text(size = 7),
     aspect.ratio = 1.5,
-    legend.direction = "vertical"
+    legend.direction = "vertical",
+    axis.title.x = element_text(size = 7),
+    axis.title.y = element_text(size = 7),
   )
 
 
@@ -288,12 +302,14 @@ p3 <- university_clean |>
     color = "First-Generation Status"
   ) +
   theme(
-    plot.title = element_text(size = 7, hjust = 0.5),
+    plot.title = element_text(size = 7, hjust = 0.5, face = "bold"),
     legend.position = "bottom",
     aspect.ratio = 1.5,
     legend.text = element_text(size = 7),
     legend.title = element_text(size = 7),
-    legend.direction = "vertical"
+    legend.direction = "vertical",
+    axis.title.x = element_text(size = 7),
+    axis.title.y = element_text(size = 7),
   )
 
 
@@ -315,8 +331,12 @@ p4 <- university_clean |>
     color = "GPA Threshold"
  ) +
     theme(
-    plot.title = element_text(size = 10, face = "bold", hjust = 0.5),
-    legend.position = "top"
+    plot.title = element_text(size = 9, face = "bold", hjust = 0.5),
+    legend.position = "top",
+    axis.title.x = element_text(size = 7),
+    axis.title.y = element_text(size = 7),
+    legend.text = element_text(size = 7),
+    legend.title = element_text(size = 7)
   )
 
 
@@ -333,8 +353,13 @@ p5 <- university_clean |>
     y = "Cumulative GPA"
   ) +
     theme(
-    plot.title = element_text(size = 10, face = "bold", hjust = 0.5),
-    legend.position = "top"
+    plot.title = element_text(size = 9, face = "bold", hjust = 0.5),
+    legend.position = "top",
+    axis.title.x = element_text(size = 7),
+    axis.title.y = element_text(size = 7),
+    legend.text = element_text(size = 7),
+    legend.title = element_text(size = 7),
+    legend.direction = "vertical"
   )
 
 
@@ -350,8 +375,13 @@ p7 <- university_clean |>
        y = " Cumulative GPA/4.0",
        title = "Relationship between Bedtime MSSD \n and Cumulative GPA" ) +
     theme(
-    plot.title = element_text(size = 10, face = "bold", hjust = 0.5),
-    legend.position = "top"
+    plot.title = element_text(size = 9, face = "bold", hjust = 0.5),
+    legend.position = "top",
+    axis.title.x = element_text(size = 7),
+    axis.title.y = element_text(size = 7),
+    legend.text = element_text(size = 7),
+    legend.title = element_text(size = 7),
+    legend.direction = "vertical"
   )
 
 
@@ -367,6 +397,13 @@ p8 <- university_clean |>
     title = "Term GPA vs. Daytime Sleep",
     x = "Daytime Sleep (minutes)",
     y = "Term GPA /4.0"
+  ) + theme(
+    axis.title.x = element_text(size = 7),
+    axis.title.y = element_text(size = 7),
+    plot.title = element_text(size = 9, hjust = 0.5, face = "bold"),
+    legend.text = element_text(size =7),
+    legend.title = element_text(size = 7),
+    legend.direction = "vertical"
   )
 
 # p9 <- university_clean |>
@@ -400,7 +437,12 @@ p10 <- university_clean |>
     y = "Term GPA /4.0",
     color = "Daytime Sleep Length"
   ) +
-  theme(legend.position = "bottom")
+  theme(legend.position = "top",
+        axis.title.x = element_text(size = 7),
+        axis.title.y = element_text(size = 7),
+        plot.title = element_text(size = 9, hjust = 0.5, face = "bold"),
+        legend.text = element_text(size = 7),
+        legend.title = element_text(size = 7))
 
 #keep
 p12 <- ggplot(university_clean, aes(x = university, fill = gpa_split)) +
@@ -412,40 +454,17 @@ p12 <- ggplot(university_clean, aes(x = university, fill = gpa_split)) +
     fill = "GPA Split"
   ) +
     theme(
-    plot.title = element_text(size = 10, face = "bold", hjust = 0.5),
-    legend.position = "top"
+    plot.title = element_text(size = 9, face = "bold", hjust = 0.5),
+    legend.position = "top",
+    axis.title.x = element_text(size = 7),
+    axis.title.y = element_text(size = 7),
+    legend.text = element_text(size = 7),
+    legend.title = element_text(size = 7),
+    legend.direction = "vertical"
   )
 grid.arrange(p1, p2, p3, ncol = 3)
-grid.arrange(p10, p8, ncol = 2)
-grid.arrange(p4, p7, ncol = 2)
-grid.arrange(p5, p12, ncol = 2)
-
-
-
-
-
-
-# demographics_bivariate <- (p1 / p2 / p3) +
-#   plot_layout(heights = c(4, 4, 4)) + # Equal height for all rows
-#   plot_annotation(
-#     title = "Bivariate Analysis of Cumulative GPA and Total Sleep Time",
-#     theme = theme(
-#       plot.title = element_text(size = 16, face = "bold", hjust = 0.5, margin = margin(b = 15))
-#     )
-#   )
-
-#demographics_bivariate
-
-#p1 | p2 | p3
-
-#university_bivariate <- (p4 | p5) / (p7 | p12)
-
-#university_bivariate
-
-#sleep_bivariate <- (p9 | p10) 
-
-#sleep_bivariate
-
+grid.arrange(p8, p7, p5, p12, ncol = 4)
+grid.arrange(p4,p10, ncol = 2)
 ```
 
 From the graphs above, a few of the key variables seem to have some interaction effects, and a few others do not. The first graph is a scatterplot of the relationship between total sleep time and cumulative GPA, factored by race, where red points were underrepresented students, and blue points were non-underrepresented students. The slopes of the lines best fit for each level are very similar but the slope for the underrepresented students is slightly larger than the slopes for non-underrepresented students, so there might be an interaction effect there that is worth further analysis.
@@ -483,9 +502,6 @@ tidy(sig_fit) |>
 
 university_fit1 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime, data = university_clean, family = binomial)
 
-tidy(university_fit1) |>
-  kable(digits = 3)
-
 anova(sig_fit, university_fit1, test = "Chisq")
 # TotalSleepTime we should include.
 
@@ -493,19 +509,47 @@ anova(sig_fit, university_fit1, test = "Chisq")
 
 We then created a new model, sig_fit, that isolated only the variables that were significant in the output from our original model. However, there were certain variables that we felt were still necessary to assess further, and so we used a Drop-in Deviance test to compare two models, the exact same, except one included TotalSleepTime, and the other didn't. Given TotalSleepTime being central to our entire research motivation, we wanted to investigate further, and our anova table showed us the p-value being 0.004, meaning its inclusion significantly improves the fit of the model.
 
+**Analysis of Deviance Table**
+
+Model 1: as.factor(gpa_split) \~ university + demo_race + threshold_gpa
+
+Model 2: as.factor(gpa_split) \~ university + demo_race + threshold_gpa + TotalSleepTime
+
 ```{r}
 university_fit2 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + demo_firstgen + TotalSleepTime, data = university_clean, family = binomial)
 
-anova(university_fit1, university_fit2, test = "Chisq")
+ufit2_anova <- anova(university_fit1, university_fit2, test = "Chisq")
+
+simp_ufit2_anova <- ufit2_anova[, c("Df","Deviance","Pr(>Chi)")]
+simp_ufit2_anova
 
 university_fit3 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + bedtime_mssd + TotalSleepTime, data = university_clean, family = binomial)
+```
 
-anova(university_fit1, university_fit3, test = "Chisq")
+**Analysis of Deviance Table**
 
+Model 1: as.factor(gpa_split) \~ university + demo_race + threshold_gpa + TotalSleepTime
+
+Model 2: as.factor(gpa_split) \~ university + demo_race + threshold_gpa + TotalSleepTime + demo_firstgen
+
+```{r}
+ufit3_anova <- anova(university_fit1, university_fit3, test = "Chisq")
+
+simp_ufit3_anova <- ufit3_anova[, c("Df","Deviance","Pr(>Chi)")]
+simp_ufit3_anova
+```
+
+**Analysis of Deviance Table**
+
+Model 1: as.factor(gpa_split) \~ university + demo_race + threshold_gpa + TotalSleepTime
+
+Model 2: as.factor(gpa_split) \~ university + demo_race + threshold_gpa + TotalSleepTime + bedtime_mssd
+
+```{r}
 university_fit4 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + daytime_sleep_lvl + TotalSleepTime, data = university_clean, family = binomial)
-
-anova(university_fit1, university_fit4, test = "Chisq")
-
+ufit4_anova <- anova(university_fit1, university_fit4, test = "Chisq")
+simp_ufit4_anova <- ufit4_anova[, c("Df","Deviance","Pr(>Chi)")]
+simp_ufit4_anova
 
 ```
 
@@ -515,25 +559,31 @@ We then decided to check for multicollinearity given the interconnected nature o
 
 ```{r}
 university_final <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + daytime_sleep_lvl, data = university_clean, family = binomial)
-vif(university_final)
-
+tidy(vif(university_final))
 
 ```
 
-This is our final model. The GVIFs (adjusted) for all variables are not greater than 10 and are very close to 1, so we can confidently assume no multicollinearity.
+For our final model, the GVIFs (adjusted) for all variables are not greater than 10 and are very close to 1, so we can confidently assume no multicollinearity.
 
 ## Results
 
 The final model we determined is:
 
 $$
-Logit(p) = -0.2812 + 2.8255 \times \beta_{universitypublic} + 3.1011 \times \beta_{universitystem\_priv} \\
-- 1.0489 \times \beta_{demo\_race} - 1.0363 \times \beta_{threshold\_gpalow} \\
-- 0.0063 \times \beta_{TotalSleepTime} - 0.6819 \times \beta_{daytime\_sleep\_lvllow}
+logit(p_{high\_gpa}) = 2.544 - 2.825 \times universitycath\_priv \\ + 0.276 \times universitystem\_priv \\
+- 1.049 \times demo\_race - \\1.036 \times threshold\_gpalow
+\\ - 0.0063 \times TotalSleepTime \\- 0.682 \times daytime\_sleep\_lvllow
+$$
+
+$$
+p_{high\_gpa} = \frac {1} {1+e^{2.544 - 2.825 \times universitycath\_priv + 0.276 \times universitystem\_priv \\
+- 1.049 \times demo\_race - 1.036 \times threshold\_gpalow \\
+- 0.0063 \times TotalSleepTime - 0.682 \times daytime\_sleep\_lvllow}} 
 $$
 
 ```{r}
-tidy(university_final)
+tidy(university_final) |>
+  kable(digits = 4)
 ```
 
 To confirm that the final model with predictors `university`, `demo_race`, `threshold_gpa`, `TotalSleepTime`, and `daytime_sleep_lvl` is better for predicting a high or low GPA (`gpa_split`) than the reduced model with initial significant predictors `university`, `demo_race`, and `threshold_gpa`, ROC and AUC were calculated for both models and compared.
@@ -555,9 +605,12 @@ combined_plot <- autoplot(red_roc, color = "blue") +
   geom_line(data = final_roc, aes(x = 1 - specificity, y = sensitivity, color = "Final Model")) + 
   geom_line(data = red_roc, aes(x = 1 - specificity, y = sensitivity, color = "Reduced Model")) +
   scale_color_manual(values = c("Final Model" = "red", "Reduced Model" = "black")) +
-  labs(color = "Model")
-
-combined_plot
+  labs(color = "Model") +
+  theme(plot.title = element_text(size = 9, face = "bold"),
+        axis.title.x = element_text(size = 7),
+        axis.title.y = element_text(size = 7),
+        legend.text = element_text(size = 7),
+        legend.title = element_text(size = 7))
 
 fin_aug <- augment(university_final)
 
@@ -575,7 +628,37 @@ red_auc_value <- red_auc$.estimate
 
 cat("AUC for Reduced Model:", red_auc_value, "\n")
 cat("AUC for Final Model:", final_auc_value, "\n")
+
+cooks_d <- cooks.distance(university_final)
+cooks_d_df <- tibble(obs = 1:length(cooks_d), cooks_d = cooks_d)
+
+
+inf_points <- cooks_d_df |>
+  filter(cooks_d > 1)
+inf_points
+
+
+cook_plot <- cooks_d_df |>
+  ggplot(aes(
+    x = obs,
+    y = cooks_d
+  )) +
+  geom_point(alpha = 0.3) +
+  geom_hline(yintercept = 1, color = "red", linetype = "dashed") +
+  labs(
+    title = "Cook's Distance",
+    x = "Observation Number",
+    y = "Cook's Distance"
+  ) +
+  theme(plot.title = element_text(size = 9, face = "bold"),
+        axis.title.x = element_text(size = 7),
+        axis.title.y = element_text(size = 7))
+  
+grid.arrange(combined_plot, cook_plot, ncol = 2)
+
 ```
+
+When checking for Cook's Distance, no data points were found to have a Cook's Distance greater than 1 with most far below 1, indicating that there are no influential points.
 
 We also checked AIC and BIC for the reduced and final models:
 
@@ -674,35 +757,8 @@ grid.arrange(pa1, pa2, pa3, pa4, pa5, ncol = 3)
 
 There is also no multicollinearity between predictors included in this model as the VIFs are all far below the threshold of 10.
 
-When checking for Cook's Distance, no data points were found to have a Cook's Distance greater than 1 with most far below 1, indicating that there are no influential points.
-
 ```{r}
 vif(university_final)
-vif(sig_fit)
-
-cooks_d <- cooks.distance(university_final)
-cooks_d_df <- tibble(obs = 1:length(cooks_d), cooks_d = cooks_d)
-
-
-inf_points <- cooks_d_df |>
-  filter(cooks_d > 1)
-inf_points
-
-
-cooks_d_df |>
-  ggplot(aes(
-    x = obs,
-    y = cooks_d
-  )) +
-  geom_point(alpha = 0.3) +
-  geom_hline(yintercept = 1, color = "red", linetype = "dashed") +
-  labs(
-    title = "Cook's Distance",
-    x = "Observation Number",
-    y = "Cook's Distance"
-  ) 
-  
-
 ```
 
 Although logistic regression assumes independence between observations, we grouped our observations by the type of university attended, which could introduce potential correlation between observations by school. However, we continued with logistic regression for the following reasons:
