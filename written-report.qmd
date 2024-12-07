@@ -39,7 +39,7 @@ As college students, we are interested in exploring how academic performance is 
 
 The data was originally collected with participants being first-year students at the following three universities: Carnegie Mellon University (CMU), a STEM-focused private university, The University of Washington (UW), a large public university, and Notre Dame University (ND), a private Catholic university. To collect data on sleep, each participating student was given a device to track their sleep and physical activity for a month in the spring term, and demographic data was provided by university registrars [@cmu_sleep].
 
-There were originally 634 observations, representing the 634 participants in this study. We filtered out students whose data was collected less than 50% of the term, leaving us with 588 participants. `demo_race`is a binary variable with 0 being underrepresented students and 1 being non-underrepresented students. Students are considered underrepresented if either parent is Black, Hispanic or Latino, Native American, or Pacific, and students are deemed non-underrepresented if both parents have White or Asian ancestry. The gender of the subject is also binary with 0 being male and 1 being female. First-generation status is binary with 0 being non-first gen and 1 being first-gen. The mean successive squared difference of bedtime measures the bedtime variability, specifically the average of the squared difference of bedtime on consecutive nights. To measure academic performance, we will be using variables `term_gpa` and `cum_gpa` (cumulative GPA) as response variables. Furthermore, we created the variable `gpa_split` which uses a threshold of a 3.0 GPA to determine whether a student has a "low" or "high" GPA.
+There were originally 634 observations, representing the 634 participants in this study. We filtered out students whose data was collected less than 50% of the term, leaving us with 588 participants. `demo_race`is a binary variable with 0 being underrepresented students and 1 being non-underrepresented students. Students are considered underrepresented if either parent is Black, Hispanic or Latino, Native American, or Pacific, and students are deemed non-underrepresented if both parents have White or Asian ancestry. The gender of the subject is also binary with 0 being male and 1 being female. First-generation status is binary with 0 being non-first gen and 1 being first-gen. The mean successive squared difference of bedtime measures the bedtime variability, specifically the average of the squared difference of bedtime on consecutive nights. To measure academic performance, we will be using variables `term_gpa` and `cum_gpa` (cumulative GPA) as response variables.
 
 ```{r}
 university_clean <- university_dataset |>
@@ -54,7 +54,7 @@ university_clean <- university_dataset |>
 
 ```
 
-We also created a new variable `university`, which combines studies done at the same universities on different years ranging from 2016 to 2019. We also created the variables `threshold_gpa`, and `daytime_sleep_lvl`. `threshold_gpa` is a binary variable which classifies GPA as "high" if a student's term GPA is higher than or equal to their cumulative GPA, and "low" if it is less than their cumulative GPA. `daytime_sleep_lvl` is a binary variable that uses a threshold of 60 minutes to determine whether a student's average daytime sleep is long (high) or short (low).
+Then, we created four new variables to help with our analysis. First, we created `gpa_split` which is a binary variable that classifies GPA as "High" or "Low". A "High" GPA was determined as above the 75th percentile (3.81 GPA) of the overall term GPAs. "Low" GPA represents all the term GPAs below the 75th percentile. We then created a new variable `university`, which combines studies done at the same universities on different years ranging from 2016 to 2019. We also created the variables `threshold_gpa`, and `daytime_sleep_lvl`. `threshold_gpa` is a binary variable which classifies GPA as "high" if a student's term GPA is higher than or equal to their cumulative GPA, and "low" if it is less than their cumulative GPA. `daytime_sleep_lvl` is a binary variable that uses a threshold of 60 minutes to determine whether a student's average daytime sleep is long (high) or short (low).
 
 **Univariate EDA of The Response & Key Predictor Variables:**
 
@@ -131,7 +131,7 @@ summary_table <- university_clean %>%
     Max = max(term_gpa),
     SD = sd(term_gpa)
   ) |>
-  kable(digits = 3)
+  kable(digits = 3, caption = "Summary Statistics of Term GPA")
 
 # Print summary table
 print(summary_table)
@@ -146,7 +146,7 @@ gpa_ss <- university_clean |>
      max_cgpa = max(cum_gpa, na.rm = TRUE),
      count = n()
    ) |>
-   kable(digits = 3)
+   kable(digits = 3, caption = "Summary of Cumulative GPA by University")
  gpa_ss
 
 #mutating variables
@@ -157,17 +157,6 @@ university_clean <- university_clean |>
   daytime_sleep_lvl = if_else(daytime_sleep > 60, "high", "low"))
 
 # need to continue cleaning for NAs, removing unused variables (ZtoZterm)? also maybe factor(demo firstgen, race, etc)
-
-na_table <- university_clean |>
-  group_by(university) |>
-  summarize(
-    total_count = n(),
-    na_count = sum(is.na(term_units)),
-    non_na_count = sum(!is.na(term_units))
-  ) |>
-  kable(digits = 3)
-na_table
-
 
 gpa_plots <- (pg1 | pg2) / (pg3 | pg4) 
 gpa_plots 
@@ -387,7 +376,7 @@ p12 <- ggplot(university_clean, aes(x = university, fill = gpa_split)) +
     legend.title = element_text(size = 7),
     legend.direction = "vertical"
   )
-grid.arrange(p8, p7, p5, p12, ncol = 4)
+grid.arrange(p7, p5, p12, ncol = 4)
 grid.arrange(p4,p10, ncol = 2)
 ```
 
@@ -823,6 +812,20 @@ p3 <- university_clean |>
   )
 
 grid.arrange(p1, p2, p3, ncol = 3)
+```
+
+figure 2:\
+
+```{r}
+na_table <- university_clean |>
+  group_by(university) |>
+  summarize(
+    total_count = n(),
+    na_count = sum(is.na(term_units)),
+    non_na_count = sum(!is.na(term_units))
+  ) |>
+  kable(digits = 3, caption = "Counts of NA values by University")
+na_table
 ```
 
 We then looked at the confidence matrix of our model:
