@@ -736,7 +736,7 @@ Although logistic regression assumes independence between observations, we group
 
 **APPENDIX:**\
 
-Figure 1: \
+Figure 1:\
 
 ```{r}
 
