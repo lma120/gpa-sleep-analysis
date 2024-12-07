@@ -767,6 +767,8 @@ Although logistic regression assumes independence between observations, we group
 
 -   We used `university` as one of the predictor variables to account for differences between observations and it was proven to be a significant predictor of `gpa_split` through our analysis.
 
+**APPENDIX:** \
+
 We then looked at the confidence matrix of our model:
 
 ```{r}
