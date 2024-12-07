@@ -52,14 +52,6 @@ university_clean <- university_dataset |>
   filter(demo_firstgen != 2)
 #glimpse(university_clean)
 
-#mutating variables
-university_clean <- university_clean |>
-  mutate(gpa_split = if_else(
-    cum_gpa >= 3.0, "High GPA", "Low GPA"),
-  threshold_gpa = if_else(term_gpa < cum_gpa, "low", "high"),
-  daytime_sleep_lvl = if_else(daytime_sleep > 60, "high", "low"))
-
-# need to continue cleaning for NAs, removing unused variables (ZtoZterm)? also maybe factor(demo firstgen, race, etc)
 ```
 
 We also created a new variable `university`, which combines studies done at the same universities on different years ranging from 2016 to 2019. We also created the variables `threshold_gpa`, and `daytime_sleep_lvl`. `threshold_gpa` is a binary variable which classifies GPA as "high" if a student's term GPA is higher than or equal to their cumulative GPA, and "low" if it is less than their cumulative GPA. `daytime_sleep_lvl` is a binary variable that uses a threshold of 60 minutes to determine whether a student's average daytime sleep is long (high) or short (low).
@@ -128,19 +120,21 @@ pg4 <- university_clean |>
   plot.subtitle = element_text(size = 7)
 )
 
-termgpa_ss <- university_clean |>
-  group_by(university) |>
+# Generate summary statistics table
+summary_table <- university_clean %>%
   summarize(
-    mean_tgpa = mean(term_gpa, na.rm = TRUE),
-    median_tgpa = median(term_gpa, na.rm = TRUE),
-    sd_tgpa = sd(term_gpa, na.rm = TRUE),
-    min_tgpa = min(term_gpa, na.rm = TRUE),
-   max_tgpa = max(term_gpa, na.rm = TRUE),
-   count = n()
+    Min = min(term_gpa),
+    Q1 = quantile(term_gpa, 0.25),
+    Median = median(term_gpa),
+    Mean = mean(term_gpa),
+    Q3 = quantile(term_gpa, 0.75),
+    Max = max(term_gpa),
+    SD = sd(term_gpa)
   ) |>
-  ungroup() |>
   kable(digits = 3)
-termgpa_ss
+
+# Print summary table
+print(summary_table)
 
 gpa_ss <- university_clean |>
   group_by(university) |>
@@ -154,6 +148,15 @@ gpa_ss <- university_clean |>
    ) |>
    kable(digits = 3)
  gpa_ss
+
+#mutating variables
+university_clean <- university_clean |>
+  mutate(gpa_split = if_else(
+    cum_gpa >= 3.81, "High GPA", "Low GPA"),
+  threshold_gpa = if_else(term_gpa < cum_gpa, "low", "high"),
+  daytime_sleep_lvl = if_else(daytime_sleep > 60, "high", "low"))
+
+# need to continue cleaning for NAs, removing unused variables (ZtoZterm)? also maybe factor(demo firstgen, race, etc)
 
 na_table <- university_clean |>
   group_by(university) |>
@@ -176,7 +179,9 @@ gpa_plots
 
 ```
 
-These four graphs show the counts of term GPA and cumulative GPA, split by university type, and all together. One notable point is that there are less 4.0 term GPA at the stem private school than the other two schools, but more 4.0 cumulative GPAs there than the other two schools. This could be due to the fact that classes are harder at stem private schools, so there are less 4.0 term to term than other schools, but the students may be smarter, so overall, there are more students with 4.0 cumulative GPAs. Another notable point is that the distribution of both the term GPA and cumulative GPA are unimodal and left skewed with long tails, but the term GPA has a larger spread than the cumulative GPA.
+The summary tables show the summary statistics for term GPA and cumulative GPA.
+
+These four graphs show the counts of term GPA and cumulative GPA, split by university type, and all together. One notable point is that for the catholic private school and the public school, there is a very significant difference in the count of 4.0 term GPA and 4.0 cumulative GPA. This suggests that there were a number of students at these two schools who did not have a 4.0 GPA first semester, but had a 4.0 GPA second semester. This contrasts the stem private school, whose count of 4.0 GPA’s for both term GPA and cumulative GPA are very close. This suggests that at the stem private school, the student’s who had a 4.0 first semester are also getting a 4.0 in the second semester.
 
 ```{r}
 
@@ -232,86 +237,6 @@ pg8 <- university_clean |>
 ```{r}
 fig.width = 5
 fig.height = 4
-
-p1 <- university_clean |>
-  ggplot(aes(
-    x = TotalSleepTime/60,
-    y = cum_gpa,
-    color = factor(demo_race, labels = c("Underrepresented", "Non-Underrepresented"))
-  )) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
-  labs(
-    title = "Cumulative GPA vs. Total Sleep Time \n by Race",
-    x = "Total Sleep Time (hours)",
-    y = "Cumulative GPA /4.0",
-    color = "Underrepresented Status"
-  ) +
-  theme(
-    plot.title = element_text(size = 7, hjust = 0.5, face = "bold"),
-    legend.position = "bottom",
-    legend.text = element_text(size = 7),
-    legend.title = element_text(size = 7),
-    aspect.ratio = 1.5,
-    axis.title.x = element_text(size = 7),
-    axis.title.y = element_text(size = 7),
-    legend.direction = "vertical"
-  )
-
-
-p2 <- university_clean |>
-  filter(!is.na(demo_gender)) |>
-  ggplot(aes(
-    x = TotalSleepTime,
-    y = cum_gpa,
-    color = factor(demo_race, labels = c("Male", "Female"))
-  )) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
-  labs(
-    title = "Cumulative GPA vs. Total Sleep Time \n by Gender",
-    x = "Total Sleep Time (hours)",
-    y = "Cumulative GPA /4.0",
-    color = "Gender"
-  ) +
-  theme(
-    plot.title = element_text(size = 7, hjust = 0.5, face = "bold"),
-    legend.text = element_text(size = 7),
-    legend.position = "bottom",
-    legend.title = element_text(size = 7),
-    aspect.ratio = 1.5,
-    legend.direction = "vertical",
-    axis.title.x = element_text(size = 7),
-    axis.title.y = element_text(size = 7),
-  )
-
-
-p3 <- university_clean |>
-  filter(!is.na(demo_firstgen)) |>
-  ggplot(aes(
-    x = TotalSleepTime,
-    y = cum_gpa,
-    color = factor(demo_firstgen, labels = c("Not First-Generation", "First-Generation"))
-  )) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
-  labs(
-    title = "Cumulative GPA vs. Total Sleep Time \n by First-Generation Status",
-    x = "Total Sleep Time (hours)",
-    y = "Cumulative GPA /4.0",
-    color = "First-Generation Status"
-  ) +
-  theme(
-    plot.title = element_text(size = 7, hjust = 0.5, face = "bold"),
-    legend.position = "bottom",
-    aspect.ratio = 1.5,
-    legend.text = element_text(size = 7),
-    legend.title = element_text(size = 7),
-    legend.direction = "vertical",
-    axis.title.x = element_text(size = 7),
-    axis.title.y = element_text(size = 7),
-  )
-
 
 p4 <- university_clean |>
   mutate(threshold_gpa = if_else(term_gpa < cum_gpa, "low", "high"))|>
@@ -462,10 +387,11 @@ p12 <- ggplot(university_clean, aes(x = university, fill = gpa_split)) +
     legend.title = element_text(size = 7),
     legend.direction = "vertical"
   )
-grid.arrange(p1, p2, p3, ncol = 3)
 grid.arrange(p8, p7, p5, p12, ncol = 4)
 grid.arrange(p4,p10, ncol = 2)
 ```
+
+First, we looked at the relationship between total sleep time and cumulative GPA across the factors of race, gender and first-generation status. The slopes of the line of best fit for each level of each factor were all parallel, indicating that there is most likely no interaction effect between these factors with total sleep time (refer to appendix figure 1).
 
 From the graphs above, a few of the key variables seem to have some interaction effects, and a few others do not. The first graph is a scatterplot of the relationship between total sleep time and cumulative GPA, factored by race, where red points were underrepresented students, and blue points were non-underrepresented students. The slopes of the lines best fit for each level are very similar but the slope for the underrepresented students is slightly larger than the slopes for non-underrepresented students, so there might be an interaction effect there that is worth further analysis.
 
@@ -809,6 +735,95 @@ Although logistic regression assumes independence between observations, we group
 -   We used `university` as one of the predictor variables to account for differences between observations and it was proven to be a significant predictor of `gpa_split` through our analysis.
 
 **APPENDIX:**\
+
+Figure 1: \
+
+```{r}
+
+fig.width = 5
+fig.height = 4
+
+p1 <- university_clean |>
+  ggplot(aes(
+    x = TotalSleepTime/60,
+    y = cum_gpa,
+    color = factor(demo_race, labels = c("Underrepresented", "Non-Underrepresented"))
+  )) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Cumulative GPA vs. Total Sleep Time \n by Race",
+    x = "Total Sleep Time (hours)",
+    y = "Cumulative GPA /4.0",
+    color = "Underrepresented Status"
+  ) +
+  theme(
+    plot.title = element_text(size = 7, hjust = 0.5, face = "bold"),
+    legend.position = "bottom",
+    legend.text = element_text(size = 7),
+    legend.title = element_text(size = 7),
+    aspect.ratio = 1.5,
+    axis.title.x = element_text(size = 7),
+    axis.title.y = element_text(size = 7),
+    legend.direction = "vertical"
+  )
+
+
+p2 <- university_clean |>
+  filter(!is.na(demo_gender)) |>
+  ggplot(aes(
+    x = TotalSleepTime,
+    y = cum_gpa,
+    color = factor(demo_race, labels = c("Male", "Female"))
+  )) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Cumulative GPA vs. Total Sleep Time \n by Gender",
+    x = "Total Sleep Time (hours)",
+    y = "Cumulative GPA /4.0",
+    color = "Gender"
+  ) +
+  theme(
+    plot.title = element_text(size = 7, hjust = 0.5, face = "bold"),
+    legend.text = element_text(size = 7),
+    legend.position = "bottom",
+    legend.title = element_text(size = 7),
+    aspect.ratio = 1.5,
+    legend.direction = "vertical",
+    axis.title.x = element_text(size = 7),
+    axis.title.y = element_text(size = 7),
+  )
+
+
+p3 <- university_clean |>
+  filter(!is.na(demo_firstgen)) |>
+  ggplot(aes(
+    x = TotalSleepTime,
+    y = cum_gpa,
+    color = factor(demo_firstgen, labels = c("Not First-Generation", "First-Generation"))
+  )) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Cumulative GPA vs. Total Sleep Time \n by First-Generation Status",
+    x = "Total Sleep Time (hours)",
+    y = "Cumulative GPA /4.0",
+    color = "First-Generation Status"
+  ) +
+  theme(
+    plot.title = element_text(size = 7, hjust = 0.5, face = "bold"),
+    legend.position = "bottom",
+    aspect.ratio = 1.5,
+    legend.text = element_text(size = 7),
+    legend.title = element_text(size = 7),
+    legend.direction = "vertical",
+    axis.title.x = element_text(size = 7),
+    axis.title.y = element_text(size = 7),
+  )
+
+grid.arrange(p1, p2, p3, ncol = 3)
+```
 
 We then looked at the confidence matrix of our model:
 
