@@ -1,5 +1,5 @@
 ---
-title: "The relationship between race, gender, first-gen status, and college type for sleep and GPA in college students"
+title: "The Impact of Race, Gender, First-gen Status, Sleep Amount, and Institution Type on the Academic Performance of College Students"
 author: "Wale: Liane, Amy, Eshan, Will"
 date: "10/31/24"
 format: pdf
@@ -33,7 +33,7 @@ university_dataset <- read_csv("data/cmu-sleep.csv")
 
 #### Project Motivation and Research Question
 
-As college students, we are interested in exploring how academic performance is affected differently by lack of sleep, whether a student goes to a public or private university, and more as many of these issues affect us currently. As shown in previous research, sleep impacts students’ academic achievement significantly [@effect_sleep], but we aim to explore this in terms of the time students went to bed, average sleep time, and more while also accounting for students’ background and the type of university they go to. It is generally understood that lower levels of sleep negatively impact academic performance, but we are interested in how this impact varies or might be challenged by different factors and how we may be able to predict academic performance based on different factors. We hypothesize that the average time in bed will have the largest effect on cumulative GPA and that having less variation in bed time will lead to a higher cumulative GPA. We also anticipate the type of university students attend and first-gen status to have an affect on students' GPA. Our research question is as follows: How does sleep impact academic performance across demographics of college students?
+As college students, we are interested in exploring how academic performance is affected differently by lack of sleep, whether a student goes to a public or private university, and more as many of these issues affect us currently. As shown in previous research, sleep impacts students’ academic achievement significantly [@effect_sleep], but we aim to explore this in terms of the time students went to bed, average sleep time, and more while also accounting for students’ background and the type of university they go to. It is generally understood that lower levels of sleep negatively impact academic performance, but we are interested in how this impact varies or might be challenged by different factors and how we may be able to predict academic performance based on different factors. We hypothesize that the average time in bed will have the largest effect on cumulative GPA and that having less variation in bed time will lead to a higher cumulative GPA. We also anticipate the type of university students attend and first-gen status to have an affect on students' GPA. Our research question is as follows: What factors affect academic performance (in terms of GPA) of college students?
 
 #### Dataset and Key Variables
 
@@ -514,16 +514,22 @@ sim_int2_anova
 
 With a p-value of 0.5, greater than the threshold of 0.05, we can conclude that the interaction effects between university and threshold GPA are not significant enough to be included in the final model.
 
+```{r}
+int_fit3 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + demo_firstgen + TotalSleepTime + TotalSleepTime*threshold_gpa, data = university_clean, family = binomial)
+
+int3_anova <- anova(university_fit3, int_fit3, test = "Chisq")
+
+sim_int3_anova <- int3_anova[, c("Df","Deviance","Pr(>Chi)")]
+sim_int3_anova
+```
+
 We then decided to check for multicollinearity given the interconnected nature of some of the variables. We had to use GVIF because there are a few categorical predictors used.
 
 ```{r}
 university_final <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + demo_firstgen, data = university_clean, family = binomial) #final model! university_fit3
 
-vif(university_final) #can do this bcs no interaction effects anymore? 
-
+vif(university_final)
 ```
-
-DID NOT INCLUDE INTERACTION TERMS TO SEE WHAT MAIN EFFECTS MIGHT BE MULTICOLLINEARITY
 
 For our final model, the GVIFs (adjusted) for all variables are not greater than 10 and are very close to 1, so we can confidently assume no multicollinearity.
 
