@@ -29,13 +29,13 @@ university_dataset <- read_csv("data/cmu-sleep.csv")
 #glimpse(university_dataset)
 ```
 
-### **Introduction and Data**
+## Introduction and Data
 
-**Project Motivation and Research Question:**
+#### Project Motivation and Research Question
 
 As college students, we are interested in exploring how academic performance is affected differently by lack of sleep, whether a student goes to a public or private university, and more as many of these issues affect us currently. As shown in previous research, sleep impacts students’ academic achievement significantly [@effect_sleep], but we aim to explore this in terms of the time students went to bed, average sleep time, and more while also accounting for students’ background and the type of university they go to. It is generally understood that lower levels of sleep negatively impact academic performance, but we are interested in how this impact varies or might be challenged by different factors and how we may be able to predict academic performance based on different factors. We hypothesize that the average time in bed will have the largest effect on cumulative GPA and that having less variation in bed time will lead to a higher cumulative GPA. We also anticipate the type of university students attend and first-gen status to have an affect on students' GPA. Our research question is as follows: How does sleep impact academic performance across demographics of college students?
 
-**Description of the data set and key variables:**
+#### Dataset and Key Variables
 
 The data was originally collected with participants being first-year students at the following three universities: Carnegie Mellon University (CMU), a STEM-focused private university, The University of Washington (UW), a large public university, and Notre Dame University (ND), a private Catholic university. To collect data on sleep, each participating student was given a device to track their sleep and physical activity for a month in the spring term, and demographic data was provided by university registrars [@cmu_sleep].
 
@@ -56,7 +56,7 @@ university_clean <- university_dataset |>
 
 Then, we created four new variables to help with our analysis. First, we created `gpa_split` which is a binary variable that classifies GPA as "High" or "Low". A "High" GPA was determined as above the 75th percentile (3.81 GPA) of the overall term GPAs. "Low" GPA represents all the term GPAs below the 75th percentile. We then created a new variable `university`, which combines studies done at the same universities on different years ranging from 2016 to 2019. We also created the variables `threshold_gpa`, and `daytime_sleep_lvl`. `threshold_gpa` is a binary variable which classifies GPA as "high" if a student's term GPA is higher than or equal to their cumulative GPA, and "low" if it is less than their cumulative GPA. `daytime_sleep_lvl` is a binary variable that uses a threshold of 60 minutes to determine whether a student's average daytime sleep is long (high) or short (low).
 
-**Univariate EDA of The Response & Key Predictor Variables:**
+#### Univariate Exploratory Data Analysis
 
 ```{r}
 #| label: univariate-EDA
@@ -134,7 +134,7 @@ summary_table <- university_clean %>%
   kable(digits = 3, caption = "Summary Statistics of Term GPA")
 
 # Print summary table
-print(summary_table)
+summary_table
 
 gpa_ss <- university_clean |>
   group_by(university) |>
@@ -221,7 +221,7 @@ pg8 <- university_clean |>
 #sleep_plots
 ```
 
-**Bivariate EDA of The Response & Key Predictor Variables:**
+**Bivariate Exploratory Data Analysis**
 
 ```{r}
 fig.width = 5
@@ -731,9 +731,13 @@ Although logistic regression assumes independence between observations, we group
 
 -   We used `university` as one of the predictor variables to account for differences between observations and it was proven to be a significant predictor of `gpa_split` through our analysis.
 
-**APPENDIX:**\
+## Discussion and Conclusion
 
-Figure 1:\
+insert conclusion here
+
+## Appendix 
+
+#### Figure 1.
 
 ```{r}
 
@@ -822,7 +826,7 @@ p3 <- university_clean |>
 grid.arrange(p1, p2, p3, ncol = 3)
 ```
 
-figure 2:\
+#### Figure 2.
 
 ```{r}
 na_table <- university_clean |>
@@ -835,48 +839,3 @@ na_table <- university_clean |>
   kable(digits = 3, caption = "Counts of NA values by University")
 na_table
 ```
-
-We then looked at the confidence matrix of our model:
-
-```{r}
-
-fin_aug <- fin_aug |>
-  mutate(probs = 1/(1+exp(.fitted)),
-         thresh = if_else(probs > 0.5, "High GPA", "Low GPA"))
-
-confusion_matrix <- table(Predicted = fin_aug$thresh, actual = fin_aug$'as.factor(gpa_split)')
-confusion_matrix
-
-# fin_aug <- augment(university_final)
-# red_aug <- augment(sig_fit)
-# 
-# final_aug$gpa_split <- final_aug$`as.factor(gpa_split)`
-# red_aug$gpa_split <- red_aug$`as.factor(gpa_split)`
-# 
-# 
-# final_pred <- predict(university_final, type = "response")
-# red_pred <- predict(sig_fit, type = "response")
-# 
-# final_class <- if_else(final_pred > 0.5, "first", "second")
-# red_class <- if_else(red_pred > 0.5, "first", "second")
-# 
-# final_aug |>
-#   conf_mat(gpa_split, final_class)
-# 
-# red_aug |>
-#   conf_mat(truth = all_of("as.factor(gpa_split)"), estimate = red_class)
-```
-
-$$
-accuracy = (507 +7)/(507+3+70+7) = 0.8756
-$$
-
-$$
-misclassification = (3+70)/(507+3+70+7) = 0.1244
-$$
-
-The accuracy of this model with a classification threshold of 0.5 is 0.8756. The misclassification rate of this model with a classification threshold of 0.5 is 0.1244.
-
-Therefore, our model does well in predicting a high or low GPA with our chosen predictors.
-
-In conclusion, significant factors that impact academic performance are university, underrepresented status, academic performance compared across semesters, total sleep time, and whether or not students napped for over 1 hour during the day.
