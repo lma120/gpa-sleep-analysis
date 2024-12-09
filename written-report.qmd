@@ -570,13 +570,11 @@ The final model we determined is:
 EDIT THESE WITH FINAL MODELS AFTER MODEL IS FINALIZED!!
 
 $$
-logit(p_{high\_gpa}) = 4.206 - 0.871 \times universitycath\_priv \\ -0.286 \times universitystem\_priv \\
-- 0.694 \times demo\_race
-$$
-
-$$
-- \\0.475 \times threshold\_gpalow
-\\ - 0.005 \times TotalSleepTime \\- 1.088 \times demo\_firstgen
+logit(p_{high\_gpa}) = 4.187 - 0.619 \times universitycath\_priv \\ +0.188 \times universitystem\_priv \\
+- 0.828 \times demo\_race \\
++ 1.750 \times threshold\_gpalow \\
+- 0.008 \times TotalSleepTime \\ 
++ 1.006 \times demo\_firstgen
 $$
 
 $$
