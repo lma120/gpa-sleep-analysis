@@ -33,7 +33,7 @@ university_dataset <- read_csv("data/cmu-sleep.csv")
 
 #### Project Motivation and Research Question
 
-As college students, we are interested in exploring how academic performance is affected differently by lack of sleep, whether a student goes to a public or private university, and more as many of these issues affect us currently. As shown in previous research, sleep impacts students’ academic achievement significantly [@effect_sleep], but we aim to explore this in terms of the time students went to bed, average sleep time, and more while also accounting for students’ background and the type of university they go to. It is generally understood that lower levels of sleep negatively impact academic performance, but we are interested in how this impact varies or might be challenged by different factors and how we may be able to predict academic performance based on different factors. We hypothesize that the average time in bed will have the largest effect on cumulative GPA and that having less variation in bed time will lead to a higher cumulative GPA. We also anticipate the type of university students attend and first-gen status to have an affect on students' GPA. Our research question is as follows: What factors affect academic performance (in terms of GPA) of college students?
+Given our age, we are interested in exploring how collegiate academic performance is explained by various different factors, included, but not limited to, differences in a student's university type, sleep levels, and demographic background. It is generally understood that lower levels of sleep negatively impact academic performance, but we are interested in how this impact varies or might be challenged by different factors and how we may be able to predict academic performance based on different factors. We hypothesize that the average time in bed will have the largest effect on cumulative GPA and that having less variation in bed time will lead to a higher cumulative GPA. We also anticipate the type of university students attend and first-gen status to have an affect on students' GPA. Our research question is as follows: What factors affect academic performance (in terms of GPA) of college students?
 
 #### Dataset and Key Variables
 
@@ -301,6 +301,8 @@ p12 <- ggplot(university_clean, aes(x = university, fill = gpa_split)) +
 grid.arrange(p7, p12, ncol =2)
 ```
 
+The graph on the left shows the relationship between the mean successive squared difference of bedtimes (bedtime_mssd) and a student's cumulative GPA. The graph is colored by university type, with colors indicated on the legend above. The lines of best fit for catholic and stem private had similar slopes, however the public school slope was different, indicating the possibility of an interaction effect. The graph on the right shows each university’s distribution of “High” and “Low” term GPA. The ratio between “High” and “Low” term GPA at the catholic private school is the smallest of the three universities. This is somewhat surprising, given that the mean and median cumulative GPA for the catholic private school was the highest of the three.
+
 ```{r}
 fig.width = 5
 fig.height = 4
@@ -392,17 +394,7 @@ p10 <- university_clean |>
 grid.arrange(p4,p10, ncol = 2)
 ```
 
-First, we looked at the relationship between total sleep time and cumulative GPA across the factors of race, gender and first-generation status. The slopes of the line of best fit for each level of each factor were all parallel, indicating that there is most likely no interaction effect between these factors with total sleep time (refer to appendix figure 1).
-
-From the graphs above, a few of the key variables seem to have some interaction effects, and a few others do not. The first graph is a scatterplot of the relationship between total sleep time and cumulative GPA, factored by race, where red points were underrepresented students, and blue points were non-underrepresented students. The slopes of the lines best fit for each level are very similar but the slope for the underrepresented students is slightly larger than the slopes for non-underrepresented students, so there might be an interaction effect there that is worth further analysis.
-
-The second graph, is also a scatterplot of the relationship between total sleep time and cumulative GPA, but instead factored by gender, where the red points represent male gender and the blue points represent female gender. The slopes for the line best fit for each level were essentially the same, so there is no obvious interaction effect in this graph that is worth further analysis.
-
-The third graph shows the relationship between a student's term GPA and their total sleep time, but is facet wrapped by the university the student attended. A fourth variable, `threshold_gpa`, is a factor of 0 and 1, where 0 represents that the student's term GPA is greater than or equal to their cumulative GPA, and 1 represents that the student's term GPA is less than their cumulative GPA. This essentially tells us whether the student's term GPA is better or worse than their average GPA. Since this study only collected data during the singular term, this variable will help us determine whether a student with a low term GPA relative to their cumulative GPA is predictive of that student's total sleep time. There are a few interesting things to note of this graph. First, the term GPA of students at the STEM university seem to be more variable than the other two universities, and the total sleep time of the students at the STEM university seem to be on average lower than the other two universities.
-
-In regards to the interaction effects, it seems as if for all three universities there is an interaction effect between students whose term GPA is less than their cumulative and student's whose term GPA is greater than or equal to their cumulative GPA. We assume this, because for all three universities, we fit a line best fit to for both term GPA \< cumulative GPA and vise versa, and the slopes of both lines for all three universities are different. Most notably, for the private catholic university and the public university, the slopes of the level for term GPA \< cumulative GPA is greater than the slopes of the level for term GPA $\ge$ cumulative GPA. This means that there is a potential interaction effect that could be explored further.
-
-Another graph with another potential interaction effect is the sixth graph, which plots the relationship between the mean successive squared difference of bedtimes (bedtime_mssd) and a student's cumulative GPA. The points on this scatterplot were differentiated by university, with red representing the catholic private university, green representing the public university, and blue representing the STEM private university. We fit the line best fit for each of these levels, and the slope of the line for the catholic private university and the stem private university were essentially the same, but the slope of the line for the public university was slightly smaller, which means there could be a potential interaction effect there that is worth further exploration.
+The graph on the left shows the relationship between a student's term GPA and their total sleep time, but is separated by university. \`threshold_gpa\` will help us determine whether a student with a low term GPA relative to their cumulative GPA is predictive of that student's total sleep time across universities. It seems that there is a potential interaction effect between \`gpa_threshold\` and \`university\` since the relationship between Term GPA and Total Sleep Time is impacted by both \`gpa_threshold\` and university with varying patterns of \`gpa_threshold\` for all schools. The graph on the right shows the relationship between \`term_gpa\` and \`daytime_sleep\` by \`gpa_threshold\`.  We notice that if you had a higher term GPA than cumulative GPA, taking more naps did not significantly impact GPA on average. But for those that had a lower term GPA than cumulative GPA, taking more naps significantly reduced GPA on average. This suggests a potential interaction effect between \`gpa_threshold\` and \`daytime_sleep\`. 
 
 ## Methodology
 
@@ -732,7 +724,15 @@ Although logistic regression assumes independence between observations, we group
 
 ## Discussion and Conclusion
 
-insert conclusion here
+Factors that have a significant impact on students’ academic performance include university type, race, first-generation status, total sleep time, and whether students did better in the spring semester compared to the fall semester. In contrast, factors such as bedtime variability, gender, and the amount of daytime sleep were not significant in determining students’ academic performance. This gives us a full picture of how to characterize an individual (demographic and sleep-related variables). We came to this result from looking at p-values in a logistic regression model, and from using drop-in deviance tests to assess the value of adding certain variables to the model, including interaction effects. 
+
+Some limitations of this analysis are as follows: 
+
+Our cleaned dataset has a total of 588 observations, with varying numbers of students across universities, with 142 observations from the Catholic private university, 249 from the public university, and 197 from the STEM private university. Additionally, each university type (catholic private, public, and STEM private) only consisted of one university for each type (Notre Dame, University of Washington, and Carnegie Mellon respectively), which makes it difficult to generalize our conclusions to all college students across the United States. However, it is still interesting to see the comparison across university types. 
+
+Another limitation is that using term GPA as our response variable does not adequately capture all aspects of academic performance. Term GPA is only one indicator of academic performance. There are other indicators such as joining student life organizations, participating in research, internships, study abroad trips etc. which are hard to quantify. If there was more qualitative data, such as a survey that asks about a student’s participation in out of the classroom activities, and a student's perceived academic performance, we could have a more holistic model that takes into account these other factors. Furthermore, GPA across universities may be calculated with different levels of grade inflation, indicating a lack of uniformity in the response variable.
+
+\
 
 ## Appendix
 
