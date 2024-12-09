@@ -370,28 +370,24 @@ p8 <- university_clean |>
 
 p10 <- university_clean |>
   mutate(threshold_gpa = if_else(term_gpa < cum_gpa, "low", "high"))|>
-  mutate(daytime_sleep_lvl = if_else(daytime_sleep > 60, "high", "low")) |>
-  ggplot(aes(
-    x = daytime_sleep,
-    y = term_gpa,
-    color = daytime_sleep_lvl 
-  )) +
+  ggplot(aes(x = daytime_sleep, y = term_gpa, color = threshold_gpa)) +
   facet_wrap(~threshold_gpa) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
   labs(
     title = "Term GPA by Daytime Sleep",
     x = "Daytime Sleep (minutes)",
-    y = "Term GPA /4.0",
-    color = "Daytime Sleep Length"
-  ) +
-  theme(legend.position = "top",
-        axis.title.x = element_text(size = 7),
+    y = "Term GPA /4.0") +
+  theme(axis.title.x = element_text(size = 7),
         axis.title.y = element_text(size = 7),
         plot.title = element_text(size = 9, hjust = 0.5, face = "bold"),
-        legend.text = element_text(size = 7),
-        legend.title = element_text(size = 7))
-
+        legend.position = "bottom",
+        legend.key.size = unit(7, "pt"),
+        legend.title = element_text(size = 6)) +
+  scale_color_manual(values = c("high" = "lightpink",
+                         "low" = "steelblue"),
+                     labels = c("high" = "higher GPA than last semester",
+                         "low" = "lower GPA than last semester"))
 
 grid.arrange(p4,p10, ncol = 2)
 ```
@@ -426,36 +422,41 @@ We saw that (by p-value), some of these predictors were not considered significa
 
 **Analysis of Deviance Table**
 
-Model 1: `as.factor(gpa_split) ~ university + demo_race + threshold_gpa`
+Model 1: `as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + demo_firstgen`
 
-Model 2: `as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime`
+Model 2: `as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + demo_firstgen + bedtime_mssd`
 
 ```{r}
 
-sig_fit <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa, data = university_clean, family = binomial) 
+sig_fit <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa
+               + TotalSleepTime + demo_firstgen, data = university_clean,
+               family = binomial) 
 tidy(sig_fit) |>
   kable(digits = 3)
 
-university_fit1 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime, data = university_clean, family = binomial)
+university_fit1 <- glm(as.factor(gpa_split) ~ university + demo_race
+                       + threshold_gpa + TotalSleepTime + demo_firstgen
+                       + bedtime_mssd, data = university_clean,
+                       family = binomial)
 
 anova(sig_fit, university_fit1, test = "Chisq") |>
   kable(digits = 3)
-# TotalSleepTime we should include.
+
 
 ```
 
-We then created a new model, sig_fit, that isolated only the variables that were significant in the output from our original model. However, there were certain variables that we felt were still necessary to assess further, and so we used a Drop-in Deviance test to compare two models, the exact same, except one included TotalSleepTime, and the other didn't. Given TotalSleepTime being central to our entire research motivation, we wanted to investigate further, and our anova table showed us the p-value being 0.02, meaning its inclusion significantly improves the fit of the model.
+We then created a new model, sig_fit, that isolated only the variables that were significant in the output from our original model. However, there were certain variables that we felt were still necessary to assess further, and so we used a Drop-in Deviance test to compare two models, the exact same, except one included bedtime_mssd, and the other didn't. With a p-value of 0.181, greater than the threshold of 0.05, we can conclude that the inclusion of `bedtime_mssd` does not significantly improve the model fit, so we will not include it in our final model.
 
 **Analysis of Deviance Table**
 
-Model 1: `as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime`
+Model 1: `as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + demo_firstgen`
 
-Model 2: `as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + bedtime_mssd`
+Model 2: `as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + demo_firstgen + daytime_sleeplvl`
 
 ```{r}
-university_fit2 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + bedtime_mssd, data = university_clean, family = binomial)
+university_fit2 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + demo_firstgen + daytime_sleep_lvl, data = university_clean, family = binomial)
 
-ufit2_anova <- anova(university_fit1, university_fit2, test = "Chisq")
+ufit2_anova <- anova(sig_fit, university_fit2, test = "Chisq")
 
 simp_ufit2_anova <- ufit2_anova[, c("Df","Deviance","Pr(>Chi)")]
 
@@ -464,45 +465,10 @@ ufit2_anova |>
 
 ```
 
-With a p-value of 0.06, greater than the threshold of 0.05, we can conclude that the inclusion of bedtime_mssd does not significantly improve the model fit and don't include it in our final model.
+With a p-value of 0.595, greater than the threshold of 0.05, we can conclude that the inclusion of `bedtime_mssd`daytime_sleep_lvl` does not significantly improve the model fit, so we will not include it in our final model.
 
-**Analysis of Deviance Table**
-
-Model 1: `as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime`
-
-Model 2: `as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + demo_firstgen`
-
-```{r}
-university_fit3 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + demo_firstgen, data = university_clean, family = binomial) #final!
-
-ufit3_anova <- anova(university_fit1, university_fit3, test = "Chisq")
-
-simp_ufit3_anova <- ufit3_anova[, c("Df","Deviance","Pr(>Chi)")]
-
-ufit3_anova |>
-  kable(digits = 3)
-```
 
 With a p-value of 0.00409, we can conclude that the inclusion of demo_firstgen significantly improves the model fit and should be included in our final model.
-
-**Analysis of Deviance Table**
-
-Model 1: `as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + demo_firstgen`
-
-Model 2: `as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + demo_firstgen + daytime_sleep_lvl`
-
-```{r}
-university_fit4 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + daytime_sleep_lvl + TotalSleepTime + demo_firstgen, data = university_clean, family = binomial)
-
-ufit4_anova <- anova(university_fit3, university_fit4, test = "Chisq")
-simp_ufit4_anova <- ufit4_anova[, c("Df","Deviance","Pr(>Chi)")]
-
-ufit4_anova |>
-  kable(digits = 3)
-
-```
-
-With a p-value of 0.4, which is greater than the threshold, we fail to reject the null hypothesis and can conclude that the inclusion of daytime_sleep_lvl does not significantly improve the model and do not include it in our final model.
 
 We then decided to check certain interaction effects between significant main effects due to graphs in EDA (or figures in appendix?) \*\* FIX THIS
 
@@ -517,7 +483,7 @@ Model 2: `as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalS
 ```{r}
 int_fit <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + demo_firstgen + TotalSleepTime + university*TotalSleepTime, data = university_clean, family = binomial)
 
-int1_anova <- anova(university_fit3, int_fit, test = "Chisq")
+int1_anova <- anova(sig_fit, int_fit, test = "Chisq")
 
 sim_int1_anova <- int1_anova[, c("Df","Deviance","Pr(>Chi)")]
 
@@ -525,12 +491,12 @@ int1_anova |>
   kable(digits = 3)
 ```
 
-With a p-value of 0.8 which is greater than the threshold of 0.05, we can conclude that the interaction effects between university and TotalSleepTime are not significant enough to be included in the final model.
+With a p-value of 0.615 which is greater than the threshold of 0.05, we can conclude that the interaction effects between university and TotalSleepTime are not significant enough to be included in the final model.
 
 ```{r}
 int_fit2 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + demo_firstgen + TotalSleepTime + university*threshold_gpa, data = university_clean, family = binomial)
 
-int2_anova <- anova(university_fit3, int_fit2, test = "Chisq")
+int2_anova <- anova(sig_fit, int_fit2, test = "Chisq")
 
 sim_int2_anova <- int2_anova[, c("Df","Deviance","Pr(>Chi)")]
 
@@ -539,17 +505,17 @@ int2_anova |>
 
 ```
 
-With a p-value of 0.5, greater than the threshold of 0.05, we can conclude that the interaction effects between university and threshold GPA are not significant enough to be included in the final model.
+With a p-value of 0.067, greater than the threshold of 0.05, we can conclude that the interaction effects between university and threshold GPA are not significant enough to be included in the final model.
 
 ```{r}
-int_fit3 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + demo_firstgen + TotalSleepTime + TotalSleepTime*threshold_gpa, data = university_clean, family = binomial)
-
-int3_anova <- anova(university_fit3, int_fit3, test = "Chisq")
-
-sim_int3_anova <- int3_anova[, c("Df","Deviance","Pr(>Chi)")]
-
-int3_anova |>
-  kable(digits = 3)
+# int_fit3 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + demo_firstgen + TotalSleepTime + threshold_gpa*demo_race, data = university_clean, family = binomial)
+# 
+# int3_anova <- anova(university_fit3, int_fit3, test = "Chisq")
+# 
+# sim_int3_anova <- int3_anova[, c("Df","Deviance","Pr(>Chi)")]
+# 
+# int3_anova |>
+#   kable(digits = 3)
 ```
 
 We then decided to check for multicollinearity given the interconnected nature of some of the variables. We had to use GVIF because there are a few categorical predictors used.
@@ -596,24 +562,18 @@ The final model we chose showed a larger AUC. The area under the curve for the f
 
 final_roc <- augment(university_final) |>
   roc_curve('as.factor(gpa_split)', .fitted, event_level = "second")
+# 
+# red_roc <- augment(sig_fit) |>
+#   roc_curve('as.factor(gpa_split)', .fitted, event_level = "second")
 
-red_roc <- augment(sig_fit) |>
-  roc_curve('as.factor(gpa_split)', .fitted, event_level = "second")
-
-combined_plot <- autoplot(red_roc, color = "blue") +
+combined_plot <- autoplot(final_roc, color = "red") +
   ggtitle("ROC Curves") +
   xlab("1 - Specificity") +
   ylab("Sensitivity") +
-  geom_line(data = final_roc, aes(x = 1 - specificity, y = sensitivity, color = "Final Model")) + 
-  geom_line(data = red_roc, aes(x = 1 - specificity, y = sensitivity, color = "Reduced Model")) +
-  scale_color_manual(values = c("Final Model" = "red", "Reduced Model" = "black")) +
-  labs(color = "Model") +
+  geom_line(data = final_roc, aes(x = 1 - specificity, y = sensitivity), color = "red", show.legend = FALSE) +
   theme(plot.title = element_text(size = 9, face = "bold"),
         axis.title.x = element_text(size = 7),
-        axis.title.y = element_text(size = 7),
-        legend.text = element_text(size = 7),
-        legend.title = element_text(size = 7),
-        legend.position = "bottom")
+        axis.title.y = element_text(size = 7))
 
 fin_aug <- augment(university_final)
 
@@ -621,15 +581,15 @@ final_auc <- fin_aug |>
   roc_auc('as.factor(gpa_split)',.fitted,
             event_level = "second")
 
-red_auc <- augment(sig_fit) |>
-  roc_auc('as.factor(gpa_split)',.fitted,
-            event_level = "second")
+# red_auc <- augment(sig_fit) |>
+#   roc_auc('as.factor(gpa_split)',.fitted,
+#             event_level = "second")
 
 final_auc_value <- final_auc$.estimate
-red_auc_value <- red_auc$.estimate
+#red_auc_value <- red_auc$.estimate
 
 
-cat("AUC for Reduced Model:", red_auc_value, "\n")
+# cat("AUC for Reduced Model:", red_auc_value, "\n")
 cat("AUC for Final Model:", final_auc_value, "\n")
 
 cooks_d <- cooks.distance(university_final)
@@ -667,14 +627,16 @@ We also checked AIC and BIC for the reduced and final models:
 
 ```{r}
 
-cat("AIC for Reduced Model:", AIC(sig_fit), "\n")
-cat("AIC for Final Model:", AIC(university_final), "\n")
+# cat("AIC for Reduced Model:", AIC(sig_fit), "\n")
+# cat("AIC for Final Model:", AIC(university_final), "\n")
+# 
+# cat("BIC for Reduced Model:", BIC(sig_fit), "\n")
+# cat("BIC for Final Model:", BIC(university_final), "\n")
 
-cat("BIC for Reduced Model:", BIC(sig_fit), "\n")
-cat("BIC for Final Model:", BIC(university_final), "\n")
+#Both the AIC and the BIC for the final model are lower than those for the reduced model as shown above. Therefore, we believe that our final model is a better model to predict a high or low GPA, and the addition of predictors `TotalSleepTime` and `daytime_sleep_lvl` are significant.
 ```
 
-Both the AIC and the BIC for the final model are lower than those for the reduced model as shown above. Therefore, we believe that our final model is a better model to predict a high or low GPA, and the addition of predictors `TotalSleepTime` and `daytime_sleep_lvl` are significant.
+
 
 Finally, we assess the key assumptions of logistic regression within our model. All predictors show a linear relationship with the log-odds:
 
