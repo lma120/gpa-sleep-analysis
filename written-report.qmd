@@ -465,8 +465,7 @@ ufit2_anova |>
 
 ```
 
-With a p-value of 0.595, greater than the threshold of 0.05, we can conclude that the inclusion of `bedtime_mssd`daytime_sleep_lvl` does not significantly improve the model fit, so we will not include it in our final model.
-
+With a p-value of 0.595, greater than the threshold of 0.05, we can conclude that the inclusion of `bedtime_mssd`daytime_sleep_lvl\` does not significantly improve the model fit, so we will not include it in our final model.
 
 With a p-value of 0.00409, we can conclude that the inclusion of demo_firstgen significantly improves the model fit and should be included in our final model.
 
@@ -635,8 +634,6 @@ We also checked AIC and BIC for the reduced and final models:
 
 #Both the AIC and the BIC for the final model are lower than those for the reduced model as shown above. Therefore, we believe that our final model is a better model to predict a high or low GPA, and the addition of predictors `TotalSleepTime` and `daytime_sleep_lvl` are significant.
 ```
-
-
 
 Finally, we assess the key assumptions of logistic regression within our model. All predictors show a linear relationship with the log-odds:
 
