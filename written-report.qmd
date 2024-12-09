@@ -224,7 +224,7 @@ p7 <- university_clean |>
        y = " Term GPA/4.0",
        title = "Relationship between Bedtime MSSD \n and Term GPA" ) +
     theme(
-    plot.title = element_text(size = 9, face = "bold", hjust = 0.5),
+    plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
     legend.position = "bottom",
     axis.title.x = element_text(size = 9),
     axis.title.y = element_text(size = 9),
@@ -244,7 +244,7 @@ p12 <- ggplot(university_clean, aes(x = university, fill = gpa_split)) +
     fill = "GPA"
   ) +
     theme(
-    plot.title = element_text(size = 9, face = "bold", hjust = 0.5),
+    plot.title = element_text(size = 12, face = "bold", hjust = 0.5),
     axis.title.x = element_text(size = 9),
     axis.title.y = element_text(size = 9),
     legend.text = element_text(size = 9),
@@ -601,8 +601,6 @@ Each university type (Catholic private, public, and STEM private) only consisted
 
 Another limitation is that using term GPA as our response variable does not adequately capture all aspects of academic performance. Term GPA is only one indicator of academic performance. There are other indicators such as joining student life organizations, participating in research, internships, study abroad trips etc. which are hard to quantify. If there was more qualitative data, such as a survey that asks about a student’s participation in out of the classroom activities, and a student's perceived academic performance, we could have a more holistic model that takes into account these other factors. Furthermore, GPA across universities may be calculated with different levels of grade inflation, indicating a lack of uniformity in the response variable.
 
-\
-
 ## Appendix
 
 #### Figure 1.
@@ -708,7 +706,7 @@ na_table <- university_clean |>
 na_table
 ```
 
-Figure 3.
+#### Figure 3.
 
 ```{r}
 pg5 <- university_clean |>
@@ -758,7 +756,7 @@ sleep_plots <- (pg5 | pg6) / (pg7 | pg8)
 sleep_plots
 ```
 
-Figure 4
+#### Figure 4.
 
 ```{r, fig.width=15, fig.height=8}
 final_pred <- predict(university_final, type = "link")
