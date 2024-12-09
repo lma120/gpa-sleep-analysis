@@ -75,6 +75,12 @@ summary_table <- university_clean %>%
 # Print summary table
 summary_table
 
+```
+
+Based on table above, the 75th percentile of overall term GPAs for this dataset was 3.81, which we used to create the response variable `gpa_split`.
+
+```{r}
+
 gpa_ss <- university_clean |>
   group_by(university) |>
    summarize(
@@ -95,12 +101,9 @@ university_clean <- university_clean |>
   threshold_gpa = if_else(term_gpa < cum_gpa, "low", "high"),
   daytime_sleep_lvl = if_else(daytime_sleep > 60, "high", "low"))
 
-
 ```
 
-The summary table on the left shows the summary statistics for term GPA. The top 25% of students had term GPAs above 3.81, and the bottom 25% had term GPAs below 3.24. This suggests that the majority of students are doing well in school. 
-
-The summary table on the right shows the summary statistics for cumulative GPA. One interesting piece of information is the minimum GPA from the catholic private school is significantly higher than the stem private school and the public school. The catholic private school’s mean and median cumulative GPA are also higher than the other two schools. This could suggest that the catholic private school has higher grade inflation than the other two schools.
+From this table, we noticed that minimum cumulative GPA at the Catholic private school is significantly higher than those of the STEM private school and public school. The Catholic private school’s mean and median cumulative GPA are also higher than the other two schools.
 
 ```{r}
 #| label: univariate-EDA
@@ -175,56 +178,9 @@ gpa_plots
 
 ```
 
-These four graphs show the counts of term GPA and cumulative GPA, split by university type, and all together. One notable point is that for the catholic private school and the public school, there is a very significant difference in the count of 4.0 term GPA and 4.0 cumulative GPA. This suggests that there were a number of students at these two schools who did not have a 4.0 GPA first semester, but had a 4.0 GPA second semester. This contrasts the stem private school, whose count of 4.0 GPA’s for both term GPA and cumulative GPA are very close. This suggests that at the stem private school, the student’s who had a 4.0 first semester are also getting a 4.0 in the second semester.
+These four graphs show the distributions of term GPA and cumulative GPA. For the Catholic private school and the public school, there is a notable increase in the number of 4.0 term GPAs (Spring semester) compared to 4.0 cumulative GPAs (Fall semester), but the number of 4.0 term GPAs remain similar for the STEM private school.
 
-```{r}
-
-pg5 <- university_clean |>
-  ggplot(aes(x = TotalSleepTime)) + 
-  geom_histogram() +
-  labs(title = "Distribution of the Total Sleep Time",
-       x = "Total Sleep Time in Minutes", #consider switching to hours
-       y = "Count") +
-    theme(
-  plot.title = element_text(size = 10)
-)
-
-
-# pg6 <- university_clean |>
-#   ggplot(aes(x = bedtime_mssd)) + 
-#   geom_histogram() +
-#   labs(title = "Distribution of the Bedtime Variability",
-#        x = "Mean successive squared difference of bedtime",
-#        y = "Count") +
-#     theme(
-#   plot.title = element_text(size = 10)
-# )
-
-
-pg7 <- university_clean |>
-  ggplot(aes(x = frac_nights_with_data)) + 
-  geom_histogram() +
-  labs(title = "Distribution of the Fraction of Nights With Data",
-       x = "Fraction of Nights With Data",
-       y = "Count") +
-    theme(
-  plot.title = element_text(size = 10)
-)
-
-
-pg8 <- university_clean |>
-  ggplot(aes(x = daytime_sleep)) + 
-  geom_histogram() +
-  labs(title = "Distribution of Daytime Sleep",
-       x = "Daytime Sleep in Minutes",
-       y = "Count") +
-    theme(
-  plot.title = element_text(size = 10)
-)
-
-#sleep_plots <- (pg5 | pg6) / (pg7 | pg8)
-#sleep_plots
-```
+Additionally, the distribution of `TotalSleepTime` appears to be unimodal and normally distributed, with a median around 400 minutes. The distribution of both bedtime variability (`bedtime_mssd`) and daytime sleep are both right-skewed (Appendix Figure 3).
 
 **Bivariate Exploratory Data Analysis**
 
@@ -280,7 +236,7 @@ p7 <- university_clean |>
 
 #keep
 p12 <- ggplot(university_clean, aes(x = university, fill = gpa_split)) +
-  geom_bar(position = "dodge") +
+  geom_bar(position = "fill") +
   labs(
     title = "Distribution of High and Low \n Term GPA by University Type",
     x = "University Type",
@@ -301,7 +257,7 @@ p12 <- ggplot(university_clean, aes(x = university, fill = gpa_split)) +
 grid.arrange(p7, p12, ncol =2)
 ```
 
-The graph on the left shows the relationship between the mean successive squared difference of bedtimes (bedtime_mssd) and a student's cumulative GPA. The graph is colored by university type, with colors indicated on the legend above. The lines of best fit for catholic and stem private had similar slopes, however the public school slope was different, indicating the possibility of an interaction effect. The graph on the right shows each university’s distribution of “High” and “Low” term GPA. The ratio between “High” and “Low” term GPA at the catholic private school is the smallest of the three universities. This is somewhat surprising, given that the mean and median cumulative GPA for the catholic private school was the highest of the three.
+The graph on the left shows the relationship between the mean successive squared difference of bedtimes (`bedtime_mssd`) and a student's term GPA. The lines of best fit for the public and STEM private school had very similar slopes and intercepts, however, for the Catholic private school, the relationship was weaker, indicating the possibility of an interaction effect. The graph on the right shows each university’s distribution of GPAs above the 75th percentile ("High GPA") compared to those below ("Low GPA"). The proportion of "High GPA"s is higher for the Catholic private university compared to those of the public and STEM private universities, which have similarly lower proportions.
 
 ```{r}
 fig.width = 5
@@ -328,11 +284,12 @@ p4 <- university_clean |>
     theme(
     plot.title = element_text(size = 8, face = "bold", hjust = 0.5),
     plot.subtitle = element_text(size = 8, face = "bold", hjust = 0.5),
-    legend.position = "top",
+    legend.position = "bottom",
     axis.title.x = element_text(size = 7),
     axis.title.y = element_text(size = 7),
     legend.text = element_text(size = 7),
-    legend.title = element_text(size = 7)
+    legend.title = element_text(size = 7),
+    legend.direction = "vertical"
   )
 
 p8 <- university_clean |>
@@ -379,13 +336,15 @@ p10 <- university_clean |>
   labs(
     title = "Term GPA by Daytime Sleep",
     x = "Daytime Sleep (minutes)",
-    y = "Term GPA /4.0") +
+    y = "Term GPA /4.0",
+    color = "GPA Threshold") +
   theme(axis.title.x = element_text(size = 7),
         axis.title.y = element_text(size = 7),
         plot.title = element_text(size = 9, hjust = 0.5, face = "bold"),
         legend.position = "bottom",
         legend.key.size = unit(7, "pt"),
-        legend.title = element_text(size = 6)) +
+        legend.title = element_text(size = 9),
+        legend.direction = "vertical") +
   scale_color_manual(values = c("high" = "lightpink",
                          "low" = "steelblue"),
                      labels = c("high" = "higher GPA than last semester",
@@ -394,11 +353,11 @@ p10 <- university_clean |>
 grid.arrange(p4,p10, ncol = 2)
 ```
 
-The graph on the left shows the relationship between a student's term GPA and their total sleep time, but is separated by university. \`threshold_gpa\` will help us determine whether a student with a low term GPA relative to their cumulative GPA is predictive of that student's total sleep time across universities. It seems that there is a potential interaction effect between \`gpa_threshold\` and \`university\` since the relationship between Term GPA and Total Sleep Time is impacted by both \`gpa_threshold\` and university with varying patterns of \`gpa_threshold\` for all schools. The graph on the right shows the relationship between \`term_gpa\` and \`daytime_sleep\` by \`gpa_threshold\`.  We notice that if you had a higher term GPA than cumulative GPA, taking more naps did not significantly impact GPA on average. But for those that had a lower term GPA than cumulative GPA, taking more naps significantly reduced GPA on average. This suggests a potential interaction effect between \`gpa_threshold\` and \`daytime_sleep\`. 
+The graph on the left shows the relationship between a student's term GPA and their total sleep time, separated by university. There is a potential interaction effect between `threshold_gpa` and `university` since the relationship between Term GPA and Total Sleep Time is different for different GPA thresholds and universities. The graph on the right shows the relationship between `term_gpa` and `daytime_sleep` by `threshold_gpa`. For students that had a higher term GPA than cumulative GPA, taking more naps did not have a notably strong relationship with term GPA; however, for those that had a lower term GPA than cumulative GPA, taking more naps had a larger impact on term GPA, suggesting a potential interaction effect between `gpa_threshold` and `daytime_sleep`. 
 
 ## Methodology
 
-Our general thought process to try and model out an answer to our research question was to think about GPA as our response variable as stated above. We felt logistic regression was a better choice using our transformed binary gpa variable, gpa_split, where a GPA above 3.0 was considered "High", and below was considered "Low." We were more concerned with understanding and predicting general ranges of academic performance as opposed to a certain GPA mark. To begin, we fit a logistic regression model with all of the variables we spoke of above (demographic variables, sleep-related variables, and a performance variable (threshold GPA)).
+To model the relationship between GPA and different factors, logistic regression was the best choice, with the response being `gpa_split`. We fit a logistic regression model with predictors `TotalSleepTime`, `university`, `daytime_sleep_lvl`, `demo_firstgen`, `demo_gender`, `bedtime_mssd`, `demo_race`, and `threshold_gpa` to see which could potentially be significant.
 
 ```{r}
 university_clean$university <- factor(university_clean$university)
@@ -410,7 +369,7 @@ tidy(log_model) |>
   kable(digits = 3)
 ```
 
-We saw that (by p-value), some of these predictors were not considered significant, and so we needed to do some more analysis to figure out what was necessary to use in the final model.
+Some of these predictors were not considered significant with p-values greater than a threshold of 0.05, so we will do further analysis to determine what is necessary to include in the final model.
 
 **Analysis of Deviance Table**
 
@@ -437,7 +396,9 @@ anova(sig_fit, university_fit1, test = "Chisq") |>
 
 ```
 
-We then created a new model, sig_fit, that isolated only the variables that were significant in the output from our original model. However, there were certain variables that we felt were still necessary to assess further, and so we used a Drop-in Deviance test to compare two models, the exact same, except one included bedtime_mssd, and the other didn't. With a p-value of 0.181, greater than the threshold of 0.05, we can conclude that the inclusion of `bedtime_mssd` does not significantly improve the model fit, so we will not include it in our final model.
+A new model was created with only the variables that were significant in the output from the first model. However, there were certain variables that we felt were still necessary to assess further, thus we used a Drop-in Deviance test to compare models.
+
+We first compared this new model with a model including `bedtime_mssd`. With a p-value of 0.181, greater than the threshold of 0.05, we can conclude that the inclusion of `bedtime_mssd` does not significantly improve the model fit, so we will not include it in our final model.
 
 **Analysis of Deviance Table**
 
@@ -457,11 +418,9 @@ ufit2_anova |>
 
 ```
 
-With a p-value of 0.595, greater than the threshold of 0.05, we can conclude that the inclusion of `bedtime_mssd`daytime_sleep_lvl\` does not significantly improve the model fit, so we will not include it in our final model.
+With a p-value of 0.595, greater than the threshold of 0.05, we can conclude that the inclusion of `daytime_sleep_lvl` does not significantly improve the model fit, so we will not include it in our final model.
 
-With a p-value of 0.00409, we can conclude that the inclusion of demo_firstgen significantly improves the model fit and should be included in our final model.
-
-We then decided to check certain interaction effects between significant main effects due to graphs in EDA (or figures in appendix?) \*\* FIX THIS
+We then decided to check whether there were any interaction effects between significant main effects, specifically between `university` & `TotalSleepTime` and `university` & `threshold_gpa` based on observations from our exploratory data analysis.
 
 **Interaction Effect Analyses:**
 
@@ -482,7 +441,7 @@ int1_anova |>
   kable(digits = 3)
 ```
 
-With a p-value of 0.615 which is greater than the threshold of 0.05, we can conclude that the interaction effects between university and TotalSleepTime are not significant enough to be included in the final model.
+With a p-value of 0.615, which is greater than the threshold of 0.05, we can conclude that the interaction effect between `university` and `TotalSleepTime` is not significant enough to be included in the final model.
 
 ```{r}
 int_fit2 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + demo_firstgen + TotalSleepTime + university*threshold_gpa, data = university_clean, family = binomial)
@@ -496,7 +455,7 @@ int2_anova |>
 
 ```
 
-With a p-value of 0.067, greater than the threshold of 0.05, we can conclude that the interaction effects between university and threshold GPA are not significant enough to be included in the final model.
+With a p-value of 0.067, greater than the threshold of 0.05, we can conclude that the interaction effect between `university` and `threshold_gpa` is not significant enough to be included in the final model.
 
 ```{r}
 # int_fit3 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + demo_firstgen + TotalSleepTime + threshold_gpa*demo_race, data = university_clean, family = binomial)
@@ -509,7 +468,7 @@ With a p-value of 0.067, greater than the threshold of 0.05, we can conclude tha
 #   kable(digits = 3)
 ```
 
-We then decided to check for multicollinearity given the interconnected nature of some of the variables. We had to use GVIF because there are a few categorical predictors used.
+We then decided to check for multicollinearity given the interconnected nature of these variables. To check this, we used the GVIF (Generalized Variance Inflation Factor) due to the presence of a few categorical predictors in our model.
 
 ```{r}
 university_final <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + demo_firstgen, data = university_clean, family = binomial) #final model! university_fit3
@@ -518,17 +477,18 @@ vif(university_final) |>
   kable(digits = 3)
 ```
 
-For our final model, the GVIFs (adjusted) for all variables are not greater than 10 and are very close to 1, so we can confidently assume no multicollinearity.
+All normalized GVIFs for all variables are not greater than the threshold of 10 and are very close to 1, so we can confidently assume no multicollinearity within our final model.
 
 ## Results
 
 The final model we determined is:
 
-EDIT THESE WITH FINAL MODELS AFTER MODEL IS FINALIZED!!
-
 $$
 logit(p_{high\_gpa}) = 4.187 - 0.619 \times universitycath\_priv \\ +0.188 \times universitystem\_priv \\
-- 0.828 \times demo\_race \\
+- 0.828 \times demo\_race
+$$
+
+$$
 + 1.750 \times threshold\_gpalow \\
 - 0.008 \times TotalSleepTime \\ 
 + 1.006 \times demo\_firstgen
@@ -545,9 +505,7 @@ tidy(university_final) |>
   kable(digits = 3)
 ```
 
-To confirm that the final model with predictors `university`, `demo_race`, `threshold_gpa`, `TotalSleepTime`, and `daytime_sleep_lvl` is better for predicting a high or low GPA (`gpa_split`) than the reduced model with initial significant predictors `university`, `demo_race`, and `threshold_gpa`, ROC and AUC were calculated for both models and compared.
-
-The final model we chose showed a larger AUC. The area under the curve for the final model is 0.778, whereas for the reduced model it is 0.75, showing that this final model maximizes sensitivity, the True Positive Rate, and minimizes 1 - specificity, the False Positive Rate, slightly better than the reduced model.
+Given the fact that none of the additional variables assessed were statistically significant, our final model is the same as our original model with university, race, first-generation status, threshold gpa, and total sleep time being predictors of whether a GPA was above the 75th percentile or not. The AUC for this model is 0.7688, indicating moderately strong predictive power.
 
 ```{r}
 
@@ -614,8 +572,6 @@ grid.arrange(combined_plot, cook_plot, ncol = 2)
 
 When checking for Cook's Distance, no data points were found to have a Cook's Distance greater than 1 with most far below 1, indicating that there are no influential points.
 
-We also checked AIC and BIC for the reduced and final models:
-
 ```{r}
 
 # cat("AIC for Reduced Model:", AIC(sig_fit), "\n")
@@ -627,94 +583,7 @@ We also checked AIC and BIC for the reduced and final models:
 #Both the AIC and the BIC for the final model are lower than those for the reduced model as shown above. Therefore, we believe that our final model is a better model to predict a high or low GPA, and the addition of predictors `TotalSleepTime` and `daytime_sleep_lvl` are significant.
 ```
 
-Finally, we assess the key assumptions of logistic regression within our model. All predictors show a linear relationship with the log-odds:
-
-```{r, fig.width=15, fig.height=8}
-final_pred <- predict(university_final, type = "link")
-
-pa1 <- ggplot(data = fin_aug, aes(x = TotalSleepTime, y = final_pred)) + 
-  geom_point() + 
-  geom_smooth(method = "lm", color = "blue") + 
-  labs(
-    title = "Logit for TotalSleepTime", 
-    y = "Log-odds(Fitted values)"
-  ) + 
-  theme(
-    legend.position = "bottom",
-    plot.title = element_text(size = 20),
-    axis.title = element_text(size = 15),       
-    axis.text = element_text(size = 15)
-  )
-
-
-pa2 <- ggplot(data = fin_aug, aes(x = university, y = final_pred)) + 
-  geom_boxplot(fill = "lightblue", color = "black") +
-    labs(
-    title = "Logit for University", 
-    y = "Log-odds(Fitted values)"
-  ) + 
-  theme(
-    legend.position = "bottom",
-    plot.title = element_text(size = 20),
-    axis.title = element_text(size = 15),       
-    axis.text = element_text(size = 15)
-  )
-
-
-pa3 <- ggplot(data = fin_aug, aes(x = factor(demo_race), y = final_pred)) + 
-  geom_boxplot(aes(fill = factor(demo_race)), color = "black") +
-    labs(
-    title = "Logit for demo_race", 
-    y = "Log-odds(Fitted values)"
-  ) + 
-  theme(
-    legend.position = "bottom",
-    plot.title = element_text(size = 20),
-    axis.title = element_text(size = 15),       
-    axis.text = element_text(size = 15),
-    legend.text = element_text(size = 15),    
-    legend.title = element_text(size = 15)
-  )
-
-
-pa4 <- ggplot(data = fin_aug, aes(x = threshold_gpa, y = final_pred)) + 
-  geom_boxplot(fill = "blue", color = "black") +
-    labs(
-    title = "Logit for threshold_gpa", 
-    y = "Log-odds(Fitted values)"
-  ) + 
-  theme(
-    legend.position = "bottom",
-    plot.title = element_text(size = 20),
-    axis.title = element_text(size = 15),       
-    axis.text = element_text(size = 15)
-  )
-
-
-pa5 <- ggplot(data = fin_aug, aes(x = factor(demo_firstgen), y = final_pred)) + 
-  geom_boxplot(fill = "darkblue", color = "black") +
-    labs(
-    title = "Logit for demo_firstgen", 
-    y = "Log-odds(Fitted values)"
-  ) + 
-  theme(
-    legend.position = "bottom",
-    plot.title = element_text(size = 20),
-    axis.title = element_text(size = 15),       
-    axis.text = element_text(size = 15)
-  )
-
-grid.arrange(pa1, pa2, pa3, pa4, pa5, ncol = 3)
-
-
-```
-
-There is also no multicollinearity between predictors included in this model as the VIFs are all far below the threshold of 10.
-
-```{r}
-vif(university_final) |>
-  kable(digits = 3)
-```
+Finally, we assess the key assumptions of logistic regression within our model. All predictors show a linear relationship with the log-odds of the response (Appendix Figure 4).
 
 Although logistic regression assumes independence between observations, we grouped our observations by the type of university attended, which could introduce potential correlation between observations by school. However, we continued with logistic regression for the following reasons:
 
@@ -724,11 +593,11 @@ Although logistic regression assumes independence between observations, we group
 
 ## Discussion and Conclusion
 
-Factors that have a significant impact on students’ academic performance include university type, race, first-generation status, total sleep time, and whether students did better in the spring semester compared to the fall semester. In contrast, factors such as bedtime variability, gender, and the amount of daytime sleep were not significant in determining students’ academic performance. This gives us a full picture of how to characterize an individual (demographic and sleep-related variables). We came to this result from looking at p-values in a logistic regression model, and from using drop-in deviance tests to assess the value of adding certain variables to the model, including interaction effects. 
+Factors that have a significant impact on students’ academic performance include university type, race, first-generation status, total sleep time, and whether students did better in the spring semester compared to the fall semester. In contrast, factors such as bedtime variability, gender, and the amount of daytime sleep were not significant in determining students’ academic performance. This gives us a full picture of how to characterize an individual (demographic and sleep-related variables). We came to this result by looking at p-values from a logistic regression model and using drop-in deviance tests to assess the value of adding certain variables and interaction effects to the model. 
 
 Some limitations of this analysis are as follows: 
 
-Our cleaned dataset has a total of 588 observations, with varying numbers of students across universities, with 142 observations from the Catholic private university, 249 from the public university, and 197 from the STEM private university. Additionally, each university type (catholic private, public, and STEM private) only consisted of one university for each type (Notre Dame, University of Washington, and Carnegie Mellon respectively), which makes it difficult to generalize our conclusions to all college students across the United States. However, it is still interesting to see the comparison across university types. 
+Each university type (Catholic private, public, and STEM private) only consisted of one university for each type (Notre Dame, University of Washington, and Carnegie Mellon respectively), which makes it difficult to generalize our conclusions to all college students across the United States. However, it is still interesting to see the comparison across university types. 
 
 Another limitation is that using term GPA as our response variable does not adequately capture all aspects of academic performance. Term GPA is only one indicator of academic performance. There are other indicators such as joining student life organizations, participating in research, internships, study abroad trips etc. which are hard to quantify. If there was more qualitative data, such as a survey that asks about a student’s participation in out of the classroom activities, and a student's perceived academic performance, we could have a more holistic model that takes into account these other factors. Furthermore, GPA across universities may be calculated with different levels of grade inflation, indicating a lack of uniformity in the response variable.
 
@@ -837,4 +706,135 @@ na_table <- university_clean |>
   ) |>
   kable(digits = 3, caption = "Counts of NA values by University")
 na_table
+```
+
+Figure 3.
+
+```{r}
+pg5 <- university_clean |>
+  ggplot(aes(x = TotalSleepTime)) + 
+  geom_histogram() +
+  labs(title = "Distribution of the Total Sleep Time",
+       x = "Total Sleep Time in Minutes", 
+       y = "Count") +
+    theme(
+  plot.title = element_text(size = 10)
+)
+
+ pg6 <- university_clean |>
+   ggplot(aes(x = bedtime_mssd)) + 
+   geom_histogram() +
+   labs(title = "Distribution of the Bedtime Variability",
+        x = "Mean successive squared difference of bedtime",
+        y = "Count") +
+     theme(
+   plot.title = element_text(size = 10)
+ )
+
+
+pg7 <- university_dataset |>
+  ggplot(aes(x = frac_nights_with_data)) + 
+  geom_histogram() +
+  labs(title = "Distribution of the Fraction of Nights With Data",
+       x = "Fraction of Nights With Data",
+       y = "Count") +
+    theme(
+  plot.title = element_text(size = 10)
+) +
+  geom_vline(xintercept = 0.5, linetype = "dashed", color = "red")
+
+
+pg8 <- university_clean |>
+  ggplot(aes(x = daytime_sleep)) + 
+  geom_histogram() +
+  labs(title = "Distribution of Daytime Sleep",
+       x = "Daytime Sleep in Minutes",
+       y = "Count") +
+    theme(
+  plot.title = element_text(size = 10)
+)
+
+sleep_plots <- (pg5 | pg6) / (pg7 | pg8)
+sleep_plots
+```
+
+Figure 4
+
+```{r, fig.width=15, fig.height=8}
+final_pred <- predict(university_final, type = "link")
+
+pa1 <- ggplot(data = fin_aug, aes(x = TotalSleepTime, y = final_pred)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", color = "blue") + 
+  labs(
+    title = "Logit for TotalSleepTime", 
+    y = "Log-odds(Fitted values)"
+  ) + 
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 15),       
+    axis.text = element_text(size = 15)
+  )
+
+
+pa2 <- ggplot(data = fin_aug, aes(x = university, y = final_pred)) + 
+  geom_boxplot(fill = "lightblue", color = "black") +
+    labs(
+    title = "Logit for University", 
+    y = "Log-odds(Fitted values)"
+  ) + 
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 15),       
+    axis.text = element_text(size = 15)
+  )
+
+
+pa3 <- ggplot(data = fin_aug, aes(x = factor(demo_race), y = final_pred)) + 
+  geom_boxplot(aes(fill = factor(demo_race)), color = "black") +
+    labs(
+    title = "Logit for demo_race", 
+    y = "Log-odds(Fitted values)"
+  ) + 
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 15),       
+    axis.text = element_text(size = 15),
+    legend.text = element_text(size = 15),    
+    legend.title = element_text(size = 15)
+  )
+
+
+pa4 <- ggplot(data = fin_aug, aes(x = threshold_gpa, y = final_pred)) + 
+  geom_boxplot(fill = "blue", color = "black") +
+    labs(
+    title = "Logit for threshold_gpa", 
+    y = "Log-odds(Fitted values)"
+  ) + 
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 15),       
+    axis.text = element_text(size = 15)
+  )
+
+
+pa5 <- ggplot(data = fin_aug, aes(x = factor(demo_firstgen), y = final_pred)) + 
+  geom_boxplot(fill = "darkblue", color = "black") +
+    labs(
+    title = "Logit for demo_firstgen", 
+    y = "Log-odds(Fitted values)"
+  ) + 
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 15),       
+    axis.text = element_text(size = 15)
+  )
+
+grid.arrange(pa1, pa2, pa3, pa4, pa5, ncol = 3)
+
 ```
