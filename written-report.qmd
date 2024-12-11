@@ -495,7 +495,7 @@ $$
 $$
 
 $$
-p_{high\_gpa} = \frac {1} {1+e^{x}} 
+p_{high\_gpa} = \frac {1} {1+e^{-x}} 
 $$
 
 Where $x$ represents the logit equation shown above.
@@ -583,7 +583,7 @@ When checking for Cook's Distance, no data points were found to have a Cook's Di
 #Both the AIC and the BIC for the final model are lower than those for the reduced model as shown above. Therefore, we believe that our final model is a better model to predict a high or low GPA, and the addition of predictors `TotalSleepTime` and `daytime_sleep_lvl` are significant.
 ```
 
-Finally, we assess the key assumptions of logistic regression within our model. All predictors show a linear relationship with the log-odds of the response (Appendix Figure 4).
+Finally, we assess the key assumptions of logistic regression within our model. The only quantitative predictor we used in our model, `TotalSleepTime`, shows a linear relationship with the log-odds of the response (Appendix Figure 4).
 
 Although logistic regression assumes independence between observations, we grouped our observations by the type of university attended, which could introduce potential correlation between observations by school. However, we continued with logistic regression for the following reasons:
 
@@ -774,65 +774,66 @@ pa1 <- ggplot(data = fin_aug, aes(x = TotalSleepTime, y = final_pred)) +
     axis.title = element_text(size = 15),       
     axis.text = element_text(size = 15)
   )
+pa1
+
+# 
+# pa2 <- ggplot(data = fin_aug, aes(x = university, y = final_pred)) + 
+#   geom_boxplot(fill = "lightblue", color = "black") +
+#     labs(
+#     title = "Logit for University", 
+#     y = "Log-odds(Fitted values)"
+#   ) + 
+#   theme(
+#     legend.position = "bottom",
+#     plot.title = element_text(size = 20),
+#     axis.title = element_text(size = 15),       
+#     axis.text = element_text(size = 15)
+#   )
+
+# 
+# pa3 <- ggplot(data = fin_aug, aes(x = factor(demo_race), y = final_pred)) + 
+#   geom_boxplot(aes(fill = factor(demo_race)), color = "black") +
+#     labs(
+#     title = "Logit for demo_race", 
+#     y = "Log-odds(Fitted values)"
+#   ) + 
+#   theme(
+#     legend.position = "bottom",
+#     plot.title = element_text(size = 20),
+#     axis.title = element_text(size = 15),       
+#     axis.text = element_text(size = 15),
+#     legend.text = element_text(size = 15),    
+#     legend.title = element_text(size = 15)
+#   )
 
 
-pa2 <- ggplot(data = fin_aug, aes(x = university, y = final_pred)) + 
-  geom_boxplot(fill = "lightblue", color = "black") +
-    labs(
-    title = "Logit for University", 
-    y = "Log-odds(Fitted values)"
-  ) + 
-  theme(
-    legend.position = "bottom",
-    plot.title = element_text(size = 20),
-    axis.title = element_text(size = 15),       
-    axis.text = element_text(size = 15)
-  )
+# pa4 <- ggplot(data = fin_aug, aes(x = threshold_gpa, y = final_pred)) + 
+#   geom_boxplot(fill = "blue", color = "black") +
+#     labs(
+#     title = "Logit for threshold_gpa", 
+#     y = "Log-odds(Fitted values)"
+#   ) + 
+#   theme(
+#     legend.position = "bottom",
+#     plot.title = element_text(size = 20),
+#     axis.title = element_text(size = 15),       
+#     axis.text = element_text(size = 15)
+#   )
 
 
-pa3 <- ggplot(data = fin_aug, aes(x = factor(demo_race), y = final_pred)) + 
-  geom_boxplot(aes(fill = factor(demo_race)), color = "black") +
-    labs(
-    title = "Logit for demo_race", 
-    y = "Log-odds(Fitted values)"
-  ) + 
-  theme(
-    legend.position = "bottom",
-    plot.title = element_text(size = 20),
-    axis.title = element_text(size = 15),       
-    axis.text = element_text(size = 15),
-    legend.text = element_text(size = 15),    
-    legend.title = element_text(size = 15)
-  )
+# pa5 <- ggplot(data = fin_aug, aes(x = factor(demo_firstgen), y = final_pred)) + 
+#   geom_boxplot(fill = "darkblue", color = "black") +
+#     labs(
+#     title = "Logit for demo_firstgen", 
+#     y = "Log-odds(Fitted values)"
+#   ) + 
+#   theme(
+#     legend.position = "bottom",
+#     plot.title = element_text(size = 20),
+#     axis.title = element_text(size = 15),       
+#     axis.text = element_text(size = 15)
+#   )
 
-
-pa4 <- ggplot(data = fin_aug, aes(x = threshold_gpa, y = final_pred)) + 
-  geom_boxplot(fill = "blue", color = "black") +
-    labs(
-    title = "Logit for threshold_gpa", 
-    y = "Log-odds(Fitted values)"
-  ) + 
-  theme(
-    legend.position = "bottom",
-    plot.title = element_text(size = 20),
-    axis.title = element_text(size = 15),       
-    axis.text = element_text(size = 15)
-  )
-
-
-pa5 <- ggplot(data = fin_aug, aes(x = factor(demo_firstgen), y = final_pred)) + 
-  geom_boxplot(fill = "darkblue", color = "black") +
-    labs(
-    title = "Logit for demo_firstgen", 
-    y = "Log-odds(Fitted values)"
-  ) + 
-  theme(
-    legend.position = "bottom",
-    plot.title = element_text(size = 20),
-    axis.title = element_text(size = 15),       
-    axis.text = element_text(size = 15)
-  )
-
-grid.arrange(pa1, pa2, pa3, pa4, pa5, ncol = 3)
+#grid.arrange(pa1, pa2, pa3, pa4, pa5, ncol = 3)
 
 ```
