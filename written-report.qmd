@@ -1,7 +1,7 @@
 ---
 title: "The Impact of Race, Gender, First-gen Status, Sleep Amount, and Institution Type on the Academic Performance of College Students"
 author: "Wale: Liane, Amy, Eshan, Will"
-date: "10/31/24"
+date: "12/12/2024"
 format: pdf
 execute: 
   warning: false
@@ -613,11 +613,17 @@ Based on the results from the coefficient for threshold GPA, we noticed that if 
 
 Factors that have a significant impact on students’ academic performance include university type, race, first-generation status, total sleep time, and whether students did better in the spring semester compared to the fall semester. In contrast, factors such as bedtime variability, gender, and the amount of daytime sleep were not significant in determining students’ academic performance. This gives us a full picture of how to characterize an individual (demographic and sleep-related variables). We came to this result by looking at p-values from a logistic regression model and using drop-in deviance tests to assess the value of adding certain variables and interaction effects to the model.
 
+\*We would recommend institution administrators to create programs that target \_\_\_\_?
+
 Some limitations of this analysis are as follows: 
 
 Each university type (Catholic private, public, and STEM private) only consisted of one university for each type (Notre Dame, University of Washington, and Carnegie Mellon respectively), which makes it difficult to generalize our conclusions to all college students across the United States. However, it is still interesting to see the comparison across university types. 
 
 Another limitation is that using term GPA as our response variable does not adequately capture all aspects of academic performance. Term GPA is only one indicator of academic performance. There are other indicators such as joining student life organizations, participating in research, internships, study abroad trips etc. which are hard to quantify. If there was more qualitative data, such as a survey that asks about a student’s participation in out of the classroom activities, and a student's perceived academic performance, we could have a more holistic model that takes into account these other factors. Furthermore, GPA across universities may be calculated with different levels of grade inflation, indicating a lack of uniformity in the response variable.
+
+A final limitation we would like to note is that the dataset used had limited numbers of certain demographic groups of students (underrepresented, male, and first-generation students) compared to other demographic groups, which could skew final results since the sample size of those groups is not very large.
+
+For future work, we would recommend analyzing data from schools across the U.S. instead of limiting to a few schools to see if our results can be generalized to the larger college student population. Using data that are adjusted for demographic proportions would also aid in accuracy of conclusions for certain demographic groups since our data was collected from volunteers.
 
 ## Appendix
 
