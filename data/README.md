@@ -14,7 +14,7 @@
 
 **demo_firstgen** First-generation status; Students were considered first-generation if neither parent completed any college (i.e., high school diploma or less) and were assigned a 1 and a 0 otherwise.
 
-**bedtime_mssd** This is a measure of bedtime variability, calculated as the average squared difference of successive bedtimes, measured in units of hours. This measures the variability from day to day by computing the average of (night2 bedtime - night1 bedtime)$^2$, (night3 bedtime - night2 bedtime)$^2$...
+**bedtime_mssd** This is a measure of bedtime variability, calculated as the average squared difference of successive bedtimes, measured in units of hours. This measures the variability from day to day by computing the average of (night2 bedtime - night1 bedtime)\^2, (night3 bedtime - night2 bedtime)\^2...
 
 **TotalSleepTime** Average time in bed (wake time minus bedtime), minus total length of awake/restlessness during this time, in minutes.
 
