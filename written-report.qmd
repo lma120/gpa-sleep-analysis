@@ -39,7 +39,7 @@ Given our age, we are interested in exploring how collegiate academic performanc
 
 The data was originally collected with participants being first-year students at the following three universities: Carnegie Mellon University (CMU), a STEM-focused private university, The University of Washington (UW), a large public university, and Notre Dame University (ND), a private Catholic university. To collect data on sleep, each participating student was given a device to track their sleep and physical activity for a month in the spring term of years 2016 to 2019, and demographic data was provided by university registrars [@cmu_sleep].
 
-There were originally 634 observations, representing the 634 participants in this study. We filtered out students whose data was collected less than 50% of the term, leaving us with 588 participants. `demo_race` is a binary variable with 0 being underrepresented students and 1 being non-underrepresented students. Students are considered underrepresented if either parent is Black, Hispanic or Latino, Native American, or Pacific, and students are deemed non-underrepresented if both parents have White or Asian ancestry. `demo_gender` and `demo_firstgen` are also both binary variables with 0 being male and 1 being female, and with 0 being non-first gen and 1 being first-gen, respectively. The mean successive squared difference of bedtime (`bedtime_mssd`) measures the bedtime variability, specifically the average of the squared difference of bedtime on consecutive nights. To measure academic performance, we will be using variables `term_gpa` and `cum_gpa` (cumulative GPA) as response variables. The cumulative GPA is the GPA of each student's freshman fall semester.
+There were originally 634 observations, representing the 634 participants in this study. We filtered out students whose data was collected less than 50% of the term, leaving us with 588 participants. `demo_race` is a binary variable with 0 being underrepresented students and 1 being non-underrepresented students. Students are considered underrepresented if either parent is Black, Hispanic or Latino, Native American, or Pacific, and students are deemed non-underrepresented if both parents have White or Asian ancestry. `demo_gender` and `demo_firstgen` are also both binary variables with 0 being male and 1 being female, and with 0 being non-first gen and 1 being first-gen, respectively. The mean successive squared difference of bedtime (`bedtime_mssd`) measures the bedtime variability, specifically the average of the squared difference of bedtime on consecutive nights. To measure academic performance, we will be using variables `term_gpa` and `cum_gpa` (cumulative GPA) as response variables. The cumulative GPA is the GPA of students' freshman fall semester, and term GPA is the GPA of students' spring semester GPA, the semester that the study was conducted.
 
 ```{r}
 university_clean <- university_dataset |>
@@ -363,7 +363,10 @@ To model the relationship between GPA and different factors, logistic regression
 university_clean$university <- factor(university_clean$university)
 university_clean$university <- relevel(university_clean$university , ref = "public")
 
-log_model <- glm(as.factor(gpa_split) ~ TotalSleepTime + university + daytime_sleep_lvl + demo_firstgen + demo_gender + bedtime_mssd + demo_race + threshold_gpa, data = university_clean, family = binomial)
+university_clean1 <-university_clean |> 
+  filter(!is.na(demo_gender))
+
+log_model <- glm(as.factor(gpa_split) ~ TotalSleepTime + university + daytime_sleep_lvl + demo_firstgen + demo_gender + bedtime_mssd + demo_race + threshold_gpa, data = university_clean1, family = binomial)
 
 tidy(log_model) |>
   kable(digits = 3)
@@ -380,14 +383,14 @@ Model 2: `as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalS
 ```{r}
 
 sig_fit <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa
-               + TotalSleepTime + demo_firstgen, data = university_clean,
+               + TotalSleepTime + demo_firstgen, data = university_clean1,
                family = binomial) 
 tidy(sig_fit) |>
   kable(digits = 3)
 
 university_fit1 <- glm(as.factor(gpa_split) ~ university + demo_race
                        + threshold_gpa + TotalSleepTime + demo_firstgen
-                       + bedtime_mssd, data = university_clean,
+                       + bedtime_mssd, data = university_clean1,
                        family = binomial)
 
 anova(sig_fit, university_fit1, test = "Chisq") |>
@@ -398,7 +401,7 @@ anova(sig_fit, university_fit1, test = "Chisq") |>
 
 A new model was created with only the variables that were significant in the output from the first model. However, there were certain variables that we felt were still necessary to assess further, thus we used a Drop-in Deviance test to compare models.
 
-We first compared this new model with a model including `bedtime_mssd`. With a p-value of 0.181, greater than the threshold of 0.05, we can conclude that the inclusion of `bedtime_mssd` does not significantly improve the model fit, so we will not include it in our final model.
+We first compared this new model with a model including `bedtime_mssd`. With a p-value of 0.173, greater than the threshold of 0.05, we can conclude that the inclusion of `bedtime_mssd` does not significantly improve the model fit, so we will not include it in our final model.
 
 **Analysis of Deviance Table**
 
@@ -407,7 +410,7 @@ Model 1: `as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalS
 Model 2: `as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + demo_firstgen + daytime_sleeplvl`
 
 ```{r}
-university_fit2 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + demo_firstgen + daytime_sleep_lvl, data = university_clean, family = binomial)
+university_fit2 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + demo_firstgen + daytime_sleep_lvl, data = university_clean1, family = binomial)
 
 ufit2_anova <- anova(sig_fit, university_fit2, test = "Chisq")
 
@@ -418,7 +421,20 @@ ufit2_anova |>
 
 ```
 
-With a p-value of 0.595, greater than the threshold of 0.05, we can conclude that the inclusion of `daytime_sleep_lvl` does not significantly improve the model fit, so we will not include it in our final model.
+With a p-value of 0.582, greater than the threshold of 0.05, we can conclude that the inclusion of `daytime_sleep_lvl` does not significantly improve the model fit, so we will not include it in our final model.
+
+```{r}
+int_fit2 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + demo_firstgen + TotalSleepTime + demo_gender, data = university_clean1, family = binomial)
+
+int2_anova <- anova(sig_fit, int_fit2, test = "Chisq")
+
+sim_int2_anova <- int2_anova[, c("Df","Deviance","Pr(>Chi)")]
+
+int2_anova |>
+  kable(digits = 3)
+```
+
+With a p-value of 0.386, greater than the threshold of 0.05, we can conclude that the inclusion of `demo_gender` does not significantly improve the model fit, so we will not include it in our final model.
 
 We then decided to check whether there were any interaction effects between significant main effects, specifically between `university` & `TotalSleepTime` and `university` & `threshold_gpa` based on observations from our exploratory data analysis.
 
@@ -431,7 +447,7 @@ Model 1: `as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalS
 Model 2: `as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + demo_firstgen + university*TotalSleepTime`
 
 ```{r}
-int_fit <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + demo_firstgen + TotalSleepTime + university*TotalSleepTime, data = university_clean, family = binomial)
+int_fit <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + demo_firstgen + TotalSleepTime + university*TotalSleepTime, data = university_clean1, family = binomial)
 
 int1_anova <- anova(sig_fit, int_fit, test = "Chisq")
 
@@ -441,10 +457,10 @@ int1_anova |>
   kable(digits = 3)
 ```
 
-With a p-value of 0.615, which is greater than the threshold of 0.05, we can conclude that the interaction effect between `university` and `TotalSleepTime` is not significant enough to be included in the final model.
+With a p-value of 0.631, which is greater than the threshold of 0.05, we can conclude that the interaction effect between `university` and `TotalSleepTime` is not significant enough to be included in the final model.
 
 ```{r}
-int_fit2 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + demo_firstgen + TotalSleepTime + university*threshold_gpa, data = university_clean, family = binomial)
+int_fit2 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + demo_firstgen + TotalSleepTime + university*threshold_gpa, data = university_clean1, family = binomial)
 
 int2_anova <- anova(sig_fit, int_fit2, test = "Chisq")
 
@@ -457,21 +473,10 @@ int2_anova |>
 
 With a p-value of 0.067, greater than the threshold of 0.05, we can conclude that the interaction effect between `university` and `threshold_gpa` is not significant enough to be included in the final model.
 
-```{r}
-# int_fit3 <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + demo_firstgen + TotalSleepTime + threshold_gpa*demo_race, data = university_clean, family = binomial)
-# 
-# int3_anova <- anova(university_fit3, int_fit3, test = "Chisq")
-# 
-# sim_int3_anova <- int3_anova[, c("Df","Deviance","Pr(>Chi)")]
-# 
-# int3_anova |>
-#   kable(digits = 3)
-```
-
 We then decided to check for multicollinearity given the interconnected nature of these variables. To check this, we used the GVIF (Generalized Variance Inflation Factor) due to the presence of a few categorical predictors in our model.
 
 ```{r}
-university_final <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + demo_firstgen, data = university_clean, family = binomial) #final model! university_fit3
+university_final <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + demo_firstgen, data = university_clean1, family = binomial) #final model! university_fit3
 
 vif(university_final) |>
   kable(digits = 3)
@@ -484,14 +489,14 @@ All normalized GVIFs for all variables are not greater than the threshold of 10 
 The final model we determined is:
 
 $$
-logit(p_{high\_gpa}) = 4.187 - 0.619 \times universitycath\_priv \\ +0.188 \times universitystem\_priv \\
-- 0.828 \times demo\_race
+logit(p_{high\_gpa}) = 4.159 - 0.611 \times universitycath\_priv \\ +0.184 \times universitystem\_priv \\
+- 0.832 \times demo\_race
 $$
 
 $$
-+ 1.750 \times threshold\_gpalow \\
++ 1.742 \times threshold\_gpalow \\
 - 0.008 \times TotalSleepTime \\ 
-+ 1.006 \times demo\_firstgen
++ 1.011 \times demo\_firstgen
 $$
 
 $$
@@ -505,10 +510,23 @@ tidy(university_final) |>
   kable(digits = 3)
 ```
 
-Given the fact that none of the additional variables assessed were statistically significant, our final model is the same as our original model with university, race, first-generation status, threshold gpa, and total sleep time being predictors of whether a GPA was above the 75th percentile or not. The AUC for this model is 0.7688, indicating moderately strong predictive power.
+Given the fact that none of the additional variables assessed were statistically significant, our final model is the same as our original model with university, race, first-generation status, threshold gpa, and total sleep time being predictors of whether a GPA was above the 75th percentile or not.
+
+The odds of having a GPA above the 75th percentile for a student at the catholic private school are 1.842 times lower than that of a student at the public university, holding all else constant.
+
+The odds of having a GPA above the 75th percentile for a student at the stem private school are 1.202 times higher than that of a student at the public university, holding all else constant. The p-value for the stem private school is 0.483, which is not significant, so the interpretation of these results is not significant.
+
+The odds of having a GPA above the 75th percentile for a non-underrepresented student are 2.298 times lower than that of a underrepresented student, holding all else constant.
+
+The odds of having a GPA above the 75th percentile for a first generation student are 2.748 times higher than that of a non-first generation student, holding all else constant.
+
+The odds of having a GPA above the 75th percentile for a student whose term GPA is lower than their cumulative GPA student are 5.709 times higher than that of a student whose term GPA is equal to or higher than their cumulative GPA, holding all else constant.
+
+For each minute increase in `TotalSleepTime` The odds of having a GPA above the 75th percentile are multiplied by a factor of 0.992 (0.8% decrease) , holding all else constant.
+
+The AUC for this model is 0.7684, indicating moderately strong predictive power.
 
 ```{r}
-
 final_roc <- augment(university_final) |>
   roc_curve('as.factor(gpa_split)', .fitted, event_level = "second")
 # 
@@ -537,17 +555,13 @@ final_auc <- fin_aug |>
 final_auc_value <- final_auc$.estimate
 #red_auc_value <- red_auc$.estimate
 
-
-# cat("AUC for Reduced Model:", red_auc_value, "\n")
-cat("AUC for Final Model:", final_auc_value, "\n")
-
 cooks_d <- cooks.distance(university_final)
 cooks_d_df <- tibble(obs = 1:length(cooks_d), cooks_d = cooks_d)
 
 
 inf_points <- cooks_d_df |>
   filter(cooks_d > 1)
-inf_points
+
 
 
 cook_plot <- cooks_d_df |>
@@ -593,7 +607,11 @@ Although logistic regression assumes independence between observations, we group
 
 ## Discussion and Conclusion
 
-Factors that have a significant impact on students’ academic performance include university type, race, first-generation status, total sleep time, and whether students did better in the spring semester compared to the fall semester. In contrast, factors such as bedtime variability, gender, and the amount of daytime sleep were not significant in determining students’ academic performance. This gives us a full picture of how to characterize an individual (demographic and sleep-related variables). We came to this result by looking at p-values from a logistic regression model and using drop-in deviance tests to assess the value of adding certain variables and interaction effects to the model. 
+Based on the results from previous studies, we are aware that sleeping more will have a positive effect on GPA. However, our results show that the odds of having a GPA above the 75th percentile decrease slightly as total sleep time increases. We hypothesize that while sleeping more does have a generally positive effect on GPA, sleeping too much may have a negative effect on GPA, which is pulling down the coefficient for total sleep time.
+
+Based on the results from the coefficient for threshold GPA, we noticed that if you have previously done well, i.e., your first semester GPA was already above the 75th percentile, it is likely that in the following semester, you will have a lower GPA, because it is more difficult to maintain a high GPA, or improve upon it, compared to if your first semester GPA was below the 75th percentile. This could explain why students with a lower term GPA than their cumulative GPA have a much higher odds of being above the 75th percentile in term GPA.
+
+Factors that have a significant impact on students’ academic performance include university type, race, first-generation status, total sleep time, and whether students did better in the spring semester compared to the fall semester. In contrast, factors such as bedtime variability, gender, and the amount of daytime sleep were not significant in determining students’ academic performance. This gives us a full picture of how to characterize an individual (demographic and sleep-related variables). We came to this result by looking at p-values from a logistic regression model and using drop-in deviance tests to assess the value of adding certain variables and interaction effects to the model.
 
 Some limitations of this analysis are as follows: 
 
