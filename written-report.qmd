@@ -750,7 +750,9 @@ pg5 <- university_clean |>
         x = "Mean successive squared difference of bedtime",
         y = "Count") +
      theme(
-   plot.title = element_text(size = 10)
+   plot.title = element_text(size = 9), 
+   axis.title.x = element_text(size = 7)
+   
  )
 
 
