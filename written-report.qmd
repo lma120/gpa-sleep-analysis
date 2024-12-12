@@ -385,8 +385,8 @@ Model 2: `as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalS
 sig_fit <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa
                + TotalSleepTime + demo_firstgen, data = university_clean1,
                family = binomial) 
-tidy(sig_fit) |>
-  kable(digits = 3)
+# tidy(sig_fit) |>
+#   kable(digits = 3)
 
 university_fit1 <- glm(as.factor(gpa_split) ~ university + demo_race
                        + threshold_gpa + TotalSleepTime + demo_firstgen
@@ -473,16 +473,11 @@ int2_anova |>
 
 With a p-value of 0.067, greater than the threshold of 0.05, we can conclude that the interaction effect between `university` and `threshold_gpa` is not significant enough to be included in the final model.
 
-We then decided to check for multicollinearity given the interconnected nature of these variables. To check this, we used the GVIF (Generalized Variance Inflation Factor) due to the presence of a few categorical predictors in our model.
+We then decided to check for multicollinearity given the interconnected nature of these variables. To check this, we used the GVIF (Generalized Variance Inflation Factor) due to the presence of a few categorical predictors in our model. All GVIFs for all variables are not greater than the threshold of 10 and are very close to 1, so we can confidently assume no multicollinearity within our final model (Appendix Figure 5).
 
 ```{r}
 university_final <- glm(as.factor(gpa_split) ~ university + demo_race + threshold_gpa + TotalSleepTime + demo_firstgen, data = university_clean1, family = binomial) #final model! university_fit3
-
-vif(university_final) |>
-  kable(digits = 3)
 ```
-
-All normalized GVIFs for all variables are not greater than the threshold of 10 and are very close to 1, so we can confidently assume no multicollinearity within our final model.
 
 ## Results
 
@@ -510,19 +505,11 @@ tidy(university_final) |>
   kable(digits = 3)
 ```
 
-Given the fact that none of the additional variables assessed were statistically significant, our final model is the same as our original model with university, race, first-generation status, threshold gpa, and total sleep time being predictors of whether a GPA was above the 75th percentile or not.
+Given the fact that none of the additional variables assessed with the drop-in deviance test were statistically significant, our final model is the same as the significant model, with university, race, first-generation status, whether a student's GPA was higher the Spring term or the Fall term, and total sleep time being signficant predictors of whether a student's GPA was above the 75th percentile or not.
 
-The odds of having a GPA above the 75th percentile for a student at the catholic private school are 1.842 times lower than that of a student at the public university, holding all else constant.
+From this final model, we can conclude the following:
 
-The odds of having a GPA above the 75th percentile for a student at the stem private school are 1.202 times higher than that of a student at the public university, holding all else constant. The p-value for the stem private school is 0.483, which is not significant, so the interpretation of these results is not significant.
-
-The odds of having a GPA above the 75th percentile for a non-underrepresented student are 2.298 times lower than that of a underrepresented student, holding all else constant.
-
-The odds of having a GPA above the 75th percentile for a first generation student are 2.748 times higher than that of a non-first generation student, holding all else constant.
-
-The odds of having a GPA above the 75th percentile for a student whose term GPA is lower than their cumulative GPA student are 5.709 times higher than that of a student whose term GPA is equal to or higher than their cumulative GPA, holding all else constant.
-
-For each minute increase in `TotalSleepTime` The odds of having a GPA above the 75th percentile are multiplied by a factor of 0.992 (0.8% decrease) , holding all else constant.
+The odds of having a GPA above the 75th percentile for a student at the catholic private school are 1.842 times lower than that of a student at the public university, holding all else constant. The odds of having a GPA above the 75th percentile for a student at the stem private school are 1.202 times higher than that of a student at the public university, holding all else constant. The p-value for the stem private school is 0.483, which is not significant, so the interpretation of these results is not significant. The odds of having a GPA above the 75th percentile for a non-underrepresented student are 2.298 times lower than that of a underrepresented student, holding all else constant. The odds of having a GPA above the 75th percentile for a first generation student are 2.748 times higher than that of a non-first generation student, holding all else constant. The odds of having a GPA above the 75th percentile for a student whose term GPA is lower than their cumulative GPA student are 5.709 times higher than that of a student whose term GPA is equal to or higher than their cumulative GPA, holding all else constant. For each minute increase in `TotalSleepTime` the odds of having a GPA above the 75th percentile are multiplied by a factor of 0.992 (0.8% decrease), holding all else constant.
 
 The AUC for this model is 0.7684, indicating moderately strong predictive power.
 
@@ -599,23 +586,15 @@ When checking for Cook's Distance, no data points were found to have a Cook's Di
 
 Finally, we assess the key assumptions of logistic regression within our model. The only quantitative predictor we used in our model, `TotalSleepTime`, shows a linear relationship with the log-odds of the response (Appendix Figure 4).
 
-Although logistic regression assumes independence between observations, we grouped our observations by the type of university attended, which could introduce potential correlation between observations by school. However, we continued with logistic regression for the following reasons:
-
--   We wanted to predict a categorical response variable, high vs. low GPA, from various predictors, and find the best model (from this dataset) to do so.
-
--   We used `university` as one of the predictor variables to account for differences between observations and it was proven to be a significant predictor of `gpa_split` through our analysis.
+Although logistic regression assumes independence between observations, we grouped our observations by the type of university attended, which could introduce potential correlation between observations by school. However, we continued with logistic regression because we wanted to predict a categorical response variable, high vs. low GPA, from various predictors, and find the best model (from this dataset) to do so, and we used `university` as one of the predictor variables to account for differences between observations and it was proven to be a significant predictor of `gpa_split` through our analysis.
 
 ## Discussion and Conclusion
 
-Based on the results from previous studies, we are aware that sleeping more will have a positive effect on GPA. However, our results show that the odds of having a GPA above the 75th percentile decrease slightly as total sleep time increases. We hypothesize that while sleeping more does have a generally positive effect on GPA, sleeping too much may have a negative effect on GPA, which is pulling down the coefficient for total sleep time.
-
-Based on the results from the coefficient for threshold GPA, we noticed that if you have previously done well, i.e., your first semester GPA was already above the 75th percentile, it is likely that in the following semester, you will have a lower GPA, because it is more difficult to maintain a high GPA, or improve upon it, compared to if your first semester GPA was below the 75th percentile. This could explain why students with a lower term GPA than their cumulative GPA have a much higher odds of being above the 75th percentile in term GPA.
-
 Factors that have a significant impact on students’ academic performance include university type, race, first-generation status, total sleep time, and whether students did better in the spring semester compared to the fall semester. In contrast, factors such as bedtime variability, gender, and the amount of daytime sleep were not significant in determining students’ academic performance. This gives us a full picture of how to characterize an individual (demographic and sleep-related variables). We came to this result by looking at p-values from a logistic regression model and using drop-in deviance tests to assess the value of adding certain variables and interaction effects to the model.
 
-\*We would recommend institution administrators to create programs that target \_\_\_\_?
+Based on previous research, we are aware that sleeping more will have a positive effect on GPA. However, our results show that the odds of having a GPA above the 75th percentile decrease slightly as total sleep time increases. This may be due to the fact that although sleeping more does have a generally positive effect on GPA, sleeping over a certain amount may have a largely negative effect on GPA, which is decreasing the odds. Additionally, we noticed that if you have previously done well, i.e., your first semester GPA was already above the 75th percentile, it is likely that in the following semester, you will have a lower GPA. This may be because it is more difficult to maintain a high GPA or improve upon it compared to if your first semester GPA was below the 75th percentile. This could explain why students with a lower term GPA than their cumulative GPA have a much higher odds of being above the 75th percentile in term GPA.
 
-Some limitations of this analysis are as follows: 
+Contrary to expectations, the odds of having a GPA above the 75th percentile for a non-underrepresented student were lower than that of a underrepresented student, and the odds of having a GPA above the 75th percentile for a first generation student were higher than that of a non-first generation student. This may be due to the limitations of our dataset, which are as follows:
 
 Each university type (Catholic private, public, and STEM private) only consisted of one university for each type (Notre Dame, University of Washington, and Carnegie Mellon respectively), which makes it difficult to generalize our conclusions to all college students across the United States. However, it is still interesting to see the comparison across university types. 
 
@@ -623,8 +602,9 @@ Another limitation is that using term GPA as our response variable does not adeq
 
 A final limitation we would like to note is that the dataset used had limited numbers of certain demographic groups of students (underrepresented, male, and first-generation students) compared to other demographic groups, which could skew final results since the sample size of those groups is not very large.
 
-For future work, we would recommend analyzing data from schools across the U.S. instead of limiting to a few schools to see if our results can be generalized to the larger college student population. Using data that are adjusted for demographic proportions would also aid in accuracy of conclusions for certain demographic groups since our data was collected from volunteers.
+For future work, we would recommend analyzing data from schools across the U.S. instead of limiting to a few schools to see if our results can be generalized to the larger college student population. Using data that are adjusted for demographic proportions would also aid in accuracy of conclusions for certain demographic groups since our data was collected from volunteers. We would also be interested in exploring how these results might differ across students' majors and grade levels, variables that weren't available in the dataset in this study. It is also important to understand why we had the results we did by looking deeper into the optimal amount of sleep that increases the odds of having a higher GPA, as well as how student backgrounds influence their GPAs.
 
+\pagebreak
 ## Appendix
 
 #### Figure 1.
@@ -862,4 +842,11 @@ pa1
 
 #grid.arrange(pa1, pa2, pa3, pa4, pa5, ncol = 3)
 
+```
+
+#### Figure 5.
+
+```{r}
+vif(university_final) |>
+  kable(digits = 3)
 ```
