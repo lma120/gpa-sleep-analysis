@@ -1,10 +1,3 @@
----
-editor_options: 
-markdown: 
-wrap: 72
-bibliography: data/references.bib
----
-
 # The Impact of Race, Gender, First-gen Status, Sleep Amount, and Institution Type on the Academic Performance of College Students
 
 *by Wale*
@@ -45,6 +38,4 @@ This project aims to answer the question of what factors influence academic perf
 
 **Zterm_units_ZofZ** Standardized measure of course load, where 0 represents an average course load, and positive and negative values represents heavier and lighter course loads respectively. This was calculated by finding the Z-score of every student’s units relative to their study cohort, then Z-scoring them again relative to the entire population.
 
-Source:
-
-[@cmu_sleep]
+University, Carnegie Mellon. 2023. “CMU Sleep Study: The Role of Sleep in Student WellBeing.” https://cmustatistics.github.io/data-repository/psychology/cmu-sleep.html.
