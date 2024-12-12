@@ -251,6 +251,29 @@ if (window.hljs) {
 
 
 
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
 
 
 
@@ -355,7 +378,7 @@ display: none;
 <div id="the-impact-of-race-gender-first-gen-status-sleep-amount-and-institution-type-on-the-academic-performance-of-college-students" class="section level1">
 <h1>The Impact of Race, Gender, First-gen Status, Sleep Amount, and
 Institution Type on the Academic Performance of College Students</h1>
-<p>by Wale</p>
+<p><em>by Wale</em></p>
 <div id="summary" class="section level2">
 <h2>Summary</h2>
 <p>This project aims to answer the question of what factors influence
@@ -368,6 +391,63 @@ registrars. The team fit a logistic regression model to see which
 predictors best explain the odds of having a GPA above the 75th
 percentile using factors that were found to be significant after drop-in
 deviance tests.</p>
+<div id="data-dictionary" class="section level3">
+<h3>Data Dictionary</h3>
+<p><strong>subject_id</strong> ID of the participant</p>
+<p><strong>study</strong> Study number where study 1 represents CMU in
+Spring 2018, study 2 represents UW in Spring 2018, study 3 represents UW
+in Spring 2019, study 4 represents ND in Spring 2016, and study 4
+represents CMU in Spring 2017.</p>
+<p><strong>cohort</strong> Name of the cohort the participant is in.</p>
+<p><strong>demo_race</strong> Students were considered underrepresented
+if either parent was Black, Hispanic or Latino, Native American, or
+Pacific Islander and were assigned 0. Students were non-underrepresented
+if neither parent was from an underrepresented category (i.e., both
+parents had White or Asian ancestry) and are represented by a 1.</p>
+<p><strong>demo_gender</strong> Gender of the subject, with male
+represented by a 0 and female represented by a 1, as reported by their
+institution.</p>
+<p><strong>demo_firstgen</strong> First-generation status; Students were
+considered first-generation if neither parent completed any college
+(i.e., high school diploma or less) and were assigned a 1 and a 0
+otherwise.</p>
+<p><strong>bedtime_mssd</strong> This is a measure of bedtime
+variability, calculated as the average squared difference of successive
+bedtimes, measured in units of hours. This measures the variability from
+day to day by computing the average of (night2 bedtime - night1
+bedtime)<span class="math inline">\(^2\)</span>, (night3 bedtime -
+night2 bedtime)<span class="math inline">\(^2\)</span>…</p>
+<p><strong>TotalSleepTime</strong> Average time in bed (wake time minus
+bedtime), minus total length of awake/restlessness during this time, in
+minutes.</p>
+<p><strong>midpoint_sleep</strong> Average midpoint of bedtime and wake
+time, in total minutes after 11pm. (100 is 12:40 am).</p>
+<p><strong>frac_nights_with_data</strong> Fraction of total nights where
+data was recorded. (There were some instances where Fitbit battery may
+have died or they weren’t worn to bed.)</p>
+<p><strong>daytime_sleep</strong> Average time slept during the daytime,
+including short naps, in minutes.</p>
+<p><strong>cum_gpa</strong> Cumulative GPA (out of 4.0) of all previous
+semesters. Because subjects are first years, this usually just
+represents their fall GPA.</p>
+<p><strong>term_gpa</strong> The end of term GPA (out of 4.0)</p>
+<p><strong>term_units</strong> Number of course units a student took in
+the term</p>
+<p><strong>Zterm_units_ZofZ</strong> Standardized measure of course
+load, where 0 represents an average course load, and positive and
+negative values represents heavier and lighter course loads
+respectively. This was calculated by finding the Z-score of every
+student’s units relative to their study cohort, then Z-scoring them
+again relative to the entire population.</p>
+<p>Source:</p>
+<p><span class="citation">(University 2023)</span></p>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-cmu_sleep" class="csl-entry">
+University, Carnegie Mellon. 2023. <span>“CMU Sleep Study: The Role of
+Sleep in Student Well-Being.”</span> <a href="https://cmustatistics.github.io/data-repository/psychology/cmu-sleep.html">https://cmustatistics.github.io/data-repository/psychology/cmu-sleep.html</a>.
+</div>
+</div>
+</div>
 </div>
 </div>
 
