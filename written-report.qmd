@@ -33,7 +33,7 @@ university_dataset <- read_csv("data/cmu-sleep.csv")
 
 #### Project Motivation and Research Question
 
-Given our age, we are interested in exploring how collegiate academic performance is explained by various different factors, included, but not limited to, differences in a student's university type, sleep levels, and demographic background. It is generally understood that lower levels of sleep negatively impact academic performance, but we are interested in how this impact varies or might be challenged by different factors and how we may be able to predict academic performance based on different factors. We hypothesize that the average time in bed will have the largest effect on cumulative GPA and that having less variation in bed time will lead to a higher cumulative GPA. We also anticipate the type of university students attend and first-gen status to have an affect on students' GPA. Our research question is as follows: What factors affect academic performance (in terms of GPA) of college students?
+As college students, we are interested in exploring how collegiate academic performance is explained by various different factors, included, but not limited to, differences in a student's university type, sleep levels, and demographic background. It is generally understood that lower levels of sleep negatively impact academic performance, but we are interested in how this impact varies or might be challenged by different factors and how we may be able to predict academic performance based on different factors. We hypothesize that the average time in bed will have the largest effect on cumulative GPA and that having less variation in bed time will lead to a higher cumulative GPA. We also anticipate the type of university students attend and first-gen status to have an affect on students' GPA. Our research question is as follows: What factors affect academic performance (in terms of GPA) of college students?
 
 #### Dataset and Key Variables
 
@@ -357,7 +357,7 @@ The graph on the left shows the relationship between a student's term GPA and th
 
 ## Methodology
 
-To model the relationship between GPA and different factors, logistic regression was the best choice, with the response being `gpa_split`. We fit a logistic regression model with predictors `TotalSleepTime`, `university`, `daytime_sleep_lvl`, `demo_firstgen`, `demo_gender`, `bedtime_mssd`, `demo_race`, and `threshold_gpa` to see which could potentially be significant.
+To model the relationship between GPA and different factors, logistic regression was the best choice, with the response being `gpa_split`. We fit a logistic regression model with predictors `TotalSleepTime`, `university`, `daytime_sleep_lvl`, `demo_firstgen`, `demo_gender`, `bedtime_mssd`, `demo_race`, and `threshold_gpa` to see which could potentially be significant. The three missing values in `demo_gender` were removed, which was necessary to include `demo_gender` as a predictor in the model for testing. This reduced the total number of observations from 588 to 585 observations.
 
 ```{r}
 university_clean$university <- factor(university_clean$university)
@@ -605,6 +605,7 @@ A final limitation we would like to note is that the dataset used had limited nu
 For future work, we would recommend analyzing data from schools across the U.S. instead of limiting to a few schools to see if our results can be generalized to the larger college student population. Using data that are adjusted for demographic proportions would also aid in accuracy of conclusions for certain demographic groups since our data was collected from volunteers. We would also be interested in exploring how these results might differ across students' majors and grade levels, variables that weren't available in the dataset in this study. It is also important to understand why we had the results we did by looking deeper into the optimal amount of sleep that increases the odds of having a higher GPA, as well as how student backgrounds influence their GPAs.
 
 \pagebreak
+
 ## Appendix
 
 #### Figure 1.
