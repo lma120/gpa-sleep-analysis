@@ -1,6 +1,6 @@
 # The Impact of Race, Gender, First-gen Status, Sleep Amount, and Institution Type on the Academic Performance of College Students
 
-*by Wale*
+*by Liane Ma, Amy Xu, Eshan Mehere, Will Skelly*
 
 ## Summary
 
